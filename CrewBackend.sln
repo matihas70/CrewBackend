@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34330.188
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrewBackend", "CrewBackend.csproj", "{1C26395C-D61B-45D7-8275-3D303BC5C654}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1C26395C-D61B-45D7-8275-3D303BC5C654}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C26395C-D61B-45D7-8275-3D303BC5C654}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C26395C-D61B-45D7-8275-3D303BC5C654}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C26395C-D61B-45D7-8275-3D303BC5C654}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {031FF5B1-E403-430E-80ED-FD0C3099D59A}
+	EndGlobalSection
+EndGlobal
