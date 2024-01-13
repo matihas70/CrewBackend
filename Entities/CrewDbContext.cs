@@ -15,6 +15,10 @@ public partial class CrewDbContext : DbContext
     {
     }
 
+    public virtual DbSet<ActivateAccountRequest> ActivateAccountRequests { get; set; }
+
+    public virtual DbSet<AppSetting> AppSettings { get; set; }
+
     public virtual DbSet<Group> Groups { get; set; }
 
     public virtual DbSet<Session> Sessions { get; set; }
@@ -26,6 +30,46 @@ public partial class CrewDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<ActivateAccountRequest>(entity =>
+        {
+            entity.ToTable("Activate_account_requests");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.ExpirationDate)
+                .HasColumnType("datetime")
+                .HasColumnName("Expiration_date");
+            entity.Property(e => e.UserId).HasColumnName("User_id");
+
+            entity.HasOne(d => d.User).WithMany(p => p.ActivateAccountRequests)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("FK_User_activate_request");
+        });
+
+        modelBuilder.Entity<AppSetting>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToTable("App_settings");
+
+            entity.Property(e => e.Email)
+                .HasMaxLength(200)
+                .IsUnicode(false);
+            entity.Property(e => e.EmailHost)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("Email_host");
+            entity.Property(e => e.EmailLogin)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("Email_login");
+            entity.Property(e => e.EmailPassword)
+                .HasMaxLength(200)
+                .IsUnicode(false)
+                .HasColumnName("Email_password");
+            entity.Property(e => e.EmailPort).HasColumnName("Email_port");
+            entity.Property(e => e.EmailSsl).HasColumnName("Email_ssl");
+        });
+
         modelBuilder.Entity<Group>(entity =>
         {
             entity.Property(e => e.CreateDate)

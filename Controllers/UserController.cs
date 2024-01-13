@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace CrewBackend.Controllers
 {
     [ApiController]
-    [Route("/User")]
+    [Route("User")]
     public class UserController : Controller
     {
         private readonly IAccountService accountService;
@@ -15,16 +15,22 @@ namespace CrewBackend.Controllers
 
 
 
-        [HttpPost("/Login")]
+        [HttpPost("Login")]
         public IActionResult Login(LoginUserDto dto)
         {
             return null;
         }
 
-        [HttpPost("/Register")]
-        public IActionResult Register(RegisterUserDto dto)
+        [HttpPost("Register")]
+        public IActionResult Register([FromBody]RegisterUserDto dto)
         {
-            accountService.Register(dto);
+            accountService.Register(dto, Request.Host.ToString());
+            return NoContent();
+        }
+        [HttpGet("activate/{id}")]
+        public IActionResult ActivateAccount([FromRoute]string id)
+        {
+            accountService.ActiveAccount(Guid.Parse(id));
             return NoContent();
         }
     }

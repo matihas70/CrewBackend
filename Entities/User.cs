@@ -20,4 +20,8 @@ public partial class User
     public string? Picture { get; set; }
 
     public DateTime CreateDate { get; set; }
+
+    public byte Activated { get; set; }
+
+    public virtual ICollection<ActivateAccountRequest> ActivateAccountRequests { get; set; } = new List<ActivateAccountRequest>();
 }
