@@ -15,7 +15,7 @@ namespace CrewBackend.Services
         
         public bool SendActivateMail(string to, string activationLink)
         {
-            string body = $"To active your account click this link: {activationLink}";
+            string body = $"<p>To active your account click this link: <a href=\"{activationLink}\">Click!</a></p>";
             SendEmail(to, "Active account", body);
             return false;
         }
@@ -24,7 +24,9 @@ namespace CrewBackend.Services
             MailMessage mailMessage = new MailMessage();
             mailMessage.To.Add(to);
             mailMessage.Subject = subject;
-            mailMessage.Body = body;
+            
+            mailMessage.Body = $"<!DOCTYPE html><html><body>{body}</body></html>"; ;
+            mailMessage.IsBodyHtml = true;
             try
             {
                 using CrewDbContext db = dbFactory.CreateDbContext();

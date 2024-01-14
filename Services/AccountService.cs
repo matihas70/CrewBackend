@@ -44,7 +44,7 @@ namespace CrewBackend.Services
                 User = user,
                 ExpirationDate = DateTime.Now.AddHours(2),
             });
-            emailService.SendActivateMail(dto.Email, host + $"/User/activate/{guid}");
+            emailService.SendActivateMail(dto.Email,"https://" + host + $"/User/activate/{guid}");
             db.SaveChanges();
 
             return true;
