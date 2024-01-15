@@ -2,6 +2,6 @@
 {
     public interface IEmailService
     {
-        bool SendActivateMail(string to, string activationLink);
+        void SendActivateMail(string to, string activationLink);
     }
 }

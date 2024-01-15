@@ -4,9 +4,10 @@ namespace CrewBackend.Interfaces
 {
     public interface IAccountService
     {
-        bool Register(RegisterUserDto dto, string host);
-        bool Login();
-        bool ActiveAccount(Guid id);
+        ResponseModel<object> Register(RegisterUserDto dto, string link);
+        ResponseModel<object> Login(LoginUserDto dto);
+        ResponseModel<object> SendActivationMail(string email, string link);
+        ResponseModel<object> ActiveAccount(Guid id);
 
     }
 }
