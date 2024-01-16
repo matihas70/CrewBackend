@@ -7,7 +7,7 @@ using System;
 namespace CrewBackend.Controllers
 {
     [ApiController]
-    [Route("User")]
+    [Route("Account")]
     public class UserController : Controller
     {
         private readonly IAccountService accountService;
@@ -20,11 +20,16 @@ namespace CrewBackend.Controllers
         [HttpPost("Login")]
         public IActionResult Login(LoginUserDto dto)
         {
-            ResponseModel<object> response = accountService.Login(dto);
+            ResponseModel<Guid> response = accountService.Login(dto);
             if (response.Status == Enums.StatusEnum.NotFound)
+            {
                 return NotFound(response);
+            }   
             else if(response.Status == Enums.StatusEnum.AuthenticationError)
+            {
                 return BadRequest(response);
+            }
+            Response.Cookies.Append("Session", response.ResponseData.ToString());
 
             return NoContent();
         }
@@ -36,7 +41,7 @@ namespace CrewBackend.Controllers
             if (response.Status == Enums.StatusEnum.ResourceExist)
                 return BadRequest(response);
 
-            return NoContent();
+            return Created();
         }
         [HttpPost("SendActivationMail")]
         public IActionResult SendActivationMail([FromBody]string email)
@@ -48,12 +53,11 @@ namespace CrewBackend.Controllers
                 return BadRequest(response);
 
             return NoContent();
-
         }
 
         private string CreateActivationLink()
         {
-            return "https://" + Request.Host.ToString() + "/User/activate/";
+            return "https://" + Request.Host.ToString() + "/Account/activate/";
         }
 
         [HttpGet("activate/{id}")]
@@ -63,9 +67,10 @@ namespace CrewBackend.Controllers
             if(response.Status == Enums.StatusEnum.NotFound)
                 return BadRequest(response);
             else if(response.Status == Enums.StatusEnum.Expired)
-                return Redirect(Urls.Activated + "?isActivated=false");
+                return Redirect(Urls.Front.Activated + "?isActivated=false");
             
-            return Redirect(Urls.Activated + "?isActivated=true");
+
+            return Redirect(Urls.Front.Activated + "?isActivated=true");
         }
     }
 }

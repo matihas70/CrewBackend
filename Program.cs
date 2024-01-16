@@ -2,6 +2,7 @@ using CrewBackend.Entities;
 using CrewBackend.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using CrewBackend.Services;
+using CrewBackend.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,10 +42,12 @@ if (app.Environment.IsDevelopment())
 }
 app.UseCors("ReactOrigin");
 
+
+
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
-
+app.UseMiddleware<SessionMiddleware>();
 app.MapControllers();
 
 app.Run();

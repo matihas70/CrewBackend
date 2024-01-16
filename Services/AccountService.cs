@@ -30,13 +30,13 @@ namespace CrewBackend.Services
 
             byte[] bytes = Encoding.UTF8.GetBytes(dto.Password);
             byte[] hashedBytes = SHA256.HashData(bytes);
-
+            
             User user = new User
             {
                 Name = dto.Name,
                 Surname = dto.Surname,
                 Email = dto.Email,
-                Password = Encoding.UTF8.GetString(hashedBytes),
+                Password = Convert.ToBase64String(hashedBytes),
                 Activated = 0,
                 CreateDate = DateTime.Now,
             };
@@ -55,26 +55,33 @@ namespace CrewBackend.Services
             response.Status = Enums.StatusEnum.Ok;
             return response;
         }
-        public ResponseModel<object> Login(LoginUserDto dto)
+        public ResponseModel<Guid> Login(LoginUserDto dto)
         {
             using CrewDbContext db = dbFactory.CreateDbContext();
 
             User user = db.Users.FirstOrDefault(u => u.Email == dto.Email);
-            ResponseModel<object> response = new ResponseModel<object>();
+            ResponseModel<Guid> response = new ResponseModel<Guid>();
             if (user == null)
             {
-                response.Status = Enums.StatusEnum.NotFound;
-                response.Message = "User not found";
+                response.Status = Enums.StatusEnum.AuthenticationError;
+                response.Message = "Wrong email or password";
                 return response;
             }
 
             byte[] passwordBytes = Encoding.UTF8.GetBytes(dto.Password);
             byte[] hashedPassword = SHA256.HashData(passwordBytes);
-            string hashedPasswordString = Encoding.UTF8.GetString(hashedPassword);
+            string hashedPasswordString = Convert.ToBase64String(hashedPassword); ;
             if(hashedPasswordString != user.Password)
             {
                 response.Status = Enums.StatusEnum.AuthenticationError;
-                response.Message = "Błędne hasło";
+                response.Message = "Wrong email or password";
+                return response;
+            }
+
+            if (user.Activated == 0)
+            {
+                response.Status = Enums.StatusEnum.AuthenticationError;
+                response.Message = "Account not activated";
                 return response;
             }
 
@@ -86,6 +93,7 @@ namespace CrewBackend.Services
                 CreateDate = DateTime.Now
             };
             response.Status = Enums.StatusEnum.Ok;
+            response.ResponseData = guid;
             return response;
         }
         public ResponseModel<object> SendActivationMail(string email, string link)
@@ -93,7 +101,7 @@ namespace CrewBackend.Services
             using CrewDbContext db = dbFactory.CreateDbContext();
             ResponseModel<object> response = new ResponseModel<object>();
             User user = db.Users.FirstOrDefault(u => u.Email == email);
-            if (user == null) 
+            if (user == null)
             {
                 response.Status= Enums.StatusEnum.NotFound;
                 response.Message = "User with this email doesn't exist";
@@ -141,6 +149,7 @@ namespace CrewBackend.Services
 
             db.ActivateAccountRequests.Remove(activateRequest);
             db.SaveChanges();
+
             response.Status = Enums.StatusEnum.Ok;
             return response;
         }

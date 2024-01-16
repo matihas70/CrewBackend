@@ -12,7 +12,7 @@ namespace CrewBackend.Controllers
         [HttpGet]
         public IActionResult Index()
         {
-            return Redirect(Urls.Front);
+            return Redirect(Urls.Front.Login);
         }
     }
 }
