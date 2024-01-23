@@ -3,13 +3,25 @@ using CrewBackend.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using CrewBackend.Services;
 using CrewBackend.Middlewares;
-
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers();
 
+builder.Services.AddAuthentication().AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        ValidateAudience = false,
+        ValidateIssuer = false,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
+                builder.Configuration.GetSection("AppSettings:Token").Value!))
+    };
+});
 //dotnet ef dbcontext scaffold "Name=ConnectionStrings:CrewDB" Microsoft.EntityFrameworkCore.SqlServer --output-dir Entities --force
 builder.Services.AddDbContextFactory<CrewDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("CrewDB")));

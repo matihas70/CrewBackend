@@ -2,7 +2,11 @@
 using CrewBackend.Interfaces;
 using CrewBackend.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace CrewBackend.Controllers
 {
@@ -11,11 +15,10 @@ namespace CrewBackend.Controllers
     public class UserController : Controller
     {
         private readonly IAccountService accountService;
+        private readonly IConfiguration config;
 
-        public UserController(IAccountService _accountService)
-            =>  accountService = _accountService;
-
-
+        public UserController(IAccountService _accountService, IConfiguration _config)
+            =>  (accountService, config) = (_accountService, _config);
 
         [HttpPost("Login")]
         public IActionResult Login(LoginUserDto dto)
@@ -23,15 +26,43 @@ namespace CrewBackend.Controllers
             ResponseModel<Guid> response = accountService.Login(dto);
             if (response.Status == Enums.StatusEnum.NotFound)
             {
-                return NotFound(response);
+                return NotFound(response.Message);
             }   
             else if(response.Status == Enums.StatusEnum.AuthenticationError)
             {
-                return BadRequest(response);
+                return BadRequest(response.Message);
             }
-            Response.Cookies.Append("Session", response.ResponseData.ToString());
+            Response.Cookies.Append("Session", response.ResponseData.ToString(),
+                new CookieOptions
+                {
+                    Domain = Request.Host.ToString(),
+                    HttpOnly = true
+                });
+            string token = CreateToken(dto);
 
-            return NoContent();
+            Response.Headers.Add("Token", token);
+            return Ok("Signed in successfuly");
+        }
+
+        private string CreateToken(LoginUserDto user)
+        {
+            List<Claim> claims = new List<Claim> {
+                new Claim(ClaimTypes.Email, user.Email)
+            };
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
+                config.GetSection("AppSettings:Token").Value));
+
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature);
+
+            var token = new JwtSecurityToken(
+                    claims: claims,
+                    expires: DateTime.Now.AddDays(1),
+                    signingCredentials: creds
+                );
+
+            var jwt = new JwtSecurityTokenHandler().WriteToken(token);
+            return jwt;
         }
 
         [HttpPost("Register")]
