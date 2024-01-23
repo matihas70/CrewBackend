@@ -10,4 +10,6 @@ public partial class Session
     public long UserId { get; set; }
 
     public DateTime CreateDate { get; set; }
+
+    public virtual User User { get; set; } = null!;
 }

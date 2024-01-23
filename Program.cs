@@ -5,13 +5,16 @@ using CrewBackend.Services;
 using CrewBackend.Middlewares;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 
-builder.Services.AddControllers();
-
-builder.Services.AddAuthentication().AddJwtBearer(options =>
+}).AddJwtBearer(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
     {
@@ -22,6 +25,7 @@ builder.Services.AddAuthentication().AddJwtBearer(options =>
                 builder.Configuration.GetSection("AppSettings:Token").Value!))
     };
 });
+builder.Services.AddControllers();
 //dotnet ef dbcontext scaffold "Name=ConnectionStrings:CrewDB" Microsoft.EntityFrameworkCore.SqlServer --output-dir Entities --force
 builder.Services.AddDbContextFactory<CrewDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("CrewDB")));
@@ -58,8 +62,10 @@ app.UseCors("ReactOrigin");
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
-app.UseMiddleware<SessionMiddleware>();
+
+//app.UseMiddleware<SessionMiddleware>();
 app.MapControllers();
 
 app.Run();

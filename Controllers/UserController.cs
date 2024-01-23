@@ -1,6 +1,7 @@
 ﻿using CrewBackend.Consts;
 using CrewBackend.Interfaces;
 using CrewBackend.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System;
@@ -15,15 +16,14 @@ namespace CrewBackend.Controllers
     public class UserController : Controller
     {
         private readonly IAccountService accountService;
-        private readonly IConfiguration config;
 
         public UserController(IAccountService _accountService, IConfiguration _config)
-            =>  (accountService, config) = (_accountService, _config);
+            =>  (accountService) = (_accountService);
 
         [HttpPost("Login")]
         public IActionResult Login(LoginUserDto dto)
         {
-            ResponseModel<Guid> response = accountService.Login(dto);
+            ResponseModel<LoginOutput> response = accountService.Login(dto);
             if (response.Status == Enums.StatusEnum.NotFound)
             {
                 return NotFound(response.Message);
@@ -38,32 +38,30 @@ namespace CrewBackend.Controllers
                     Domain = Request.Host.ToString(),
                     HttpOnly = true
                 });
-            string token = CreateToken(dto);
 
-            Response.Headers.Add("Token", token);
-            return Ok("Signed in successfuly");
+            return Ok(response.ResponseData.token);
         }
 
-        private string CreateToken(LoginUserDto user)
+        [HttpPost("newToken")]
+        public IActionResult CheckSession()
         {
-            List<Claim> claims = new List<Claim> {
-                new Claim(ClaimTypes.Email, user.Email)
-            };
+            string session = Request.Cookies["Session"];
+            if (session.IsNullOrEmpty()) 
+            {
+                Response.Cookies.Delete("Session");
+                return Redirect(Urls.Front.Login);
+            }
+            string token = accountService.GetToken(session);
+            if (token == null)
+            {
+                Response.Cookies.Delete("Session");
+                return Redirect(Urls.Front.Login);
+            }
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
-                config.GetSection("AppSettings:Token").Value));
-
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature);
-
-            var token = new JwtSecurityToken(
-                    claims: claims,
-                    expires: DateTime.Now.AddDays(1),
-                    signingCredentials: creds
-                );
-
-            var jwt = new JwtSecurityTokenHandler().WriteToken(token);
-            return jwt;
+            return Ok(token);
         }
+
+        
 
         [HttpPost("Register")]
         public IActionResult Register([FromBody]RegisterUserDto dto)

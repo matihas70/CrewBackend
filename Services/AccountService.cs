@@ -5,6 +5,9 @@ using CrewBackend.Interfaces;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace CrewBackend.Services
 {
@@ -12,8 +15,9 @@ namespace CrewBackend.Services
     {
         private readonly IDbContextFactory<CrewDbContext> dbFactory;
         private readonly IEmailService emailService;
-        public AccountService(IDbContextFactory<CrewDbContext> _dbFactory, IEmailService _emailService)
-            => (dbFactory, emailService) = (_dbFactory, _emailService);
+        private readonly IConfiguration config;
+        public AccountService(IDbContextFactory<CrewDbContext> _dbFactory, IEmailService _emailService, IConfiguration _config)
+            => (dbFactory, emailService, config) = (_dbFactory, _emailService, _config);
 
         
         public ResponseModel<object> Register(RegisterUserDto dto, string link)
@@ -55,12 +59,12 @@ namespace CrewBackend.Services
             response.Status = Enums.StatusEnum.Ok;
             return response;
         }
-        public ResponseModel<Guid> Login(LoginUserDto dto)
+        public ResponseModel<LoginOutput> Login(LoginUserDto dto)
         {
             using CrewDbContext db = dbFactory.CreateDbContext();
 
             User user = db.Users.FirstOrDefault(u => u.Email == dto.Email);
-            ResponseModel<Guid> response = new ResponseModel<Guid>();
+            ResponseModel<LoginOutput> response = new ResponseModel<LoginOutput>();
             if (user == null)
             {
                 response.Status = Enums.StatusEnum.AuthenticationError;
@@ -93,8 +97,47 @@ namespace CrewBackend.Services
                 CreateDate = DateTime.Now
             };
             response.Status = Enums.StatusEnum.Ok;
-            response.ResponseData = guid;
+            response.ResponseData.guid = guid;
+            response.ResponseData.token = CreateToken(dto.Email);
             return response;
+        }
+        public string GetToken(string sessionString)
+        {
+            if (!Guid.TryParse(sessionString, out Guid guid))
+            {
+                return null;
+            }
+
+            using CrewDbContext db = dbFactory.CreateDbContext();
+
+            Session session = db.Sessions.Include(s => s.User).FirstOrDefault(s => s.Id == guid);
+
+            if (session == null)
+            {
+                return null;
+            }
+            return CreateToken(session.User.Email);
+            return null;
+        }
+        private string CreateToken(string email)
+        {
+            List<Claim> claims = new List<Claim> {
+                new Claim(ClaimTypes.Email, email)
+            };
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
+                config.GetSection("AppSettings:Token").Value));
+
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature);
+
+            var token = new JwtSecurityToken(
+                    claims: claims,
+                    expires: DateTime.Now.AddMinutes(30),
+                    signingCredentials: creds
+                );
+
+            var jwt = new JwtSecurityTokenHandler().WriteToken(token);
+            return jwt;
         }
         public ResponseModel<object> SendActivationMail(string email, string link)
         {
