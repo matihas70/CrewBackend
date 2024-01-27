@@ -6,6 +6,7 @@ using CrewBackend.Middlewares;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.CookiePolicy;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -19,11 +20,19 @@ builder.Services.AddAuthentication(options =>
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuerSigningKey = true,
-        ValidateAudience = false,
-        ValidateIssuer = false,
+        ValidateAudience = true,
+        ValidateIssuer = true,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
-                builder.Configuration.GetSection("AppSettings:Token").Value!))
+                builder.Configuration.GetSection("Jwt:Key").Value!)),
+        ValidAudience = builder.Configuration.GetSection("Jwt:Audience").Value,
+        ValidIssuer = builder.Configuration.GetSection("Jwt:Issuer").Value
     };
+});
+builder.Services.Configure<CookiePolicyOptions>(options =>
+{
+    options.MinimumSameSitePolicy = SameSiteMode.None;
+    options.HttpOnly = HttpOnlyPolicy.None;
+    options.Secure = CookieSecurePolicy.None;
 });
 builder.Services.AddControllers();
 //dotnet ef dbcontext scaffold "Name=ConnectionStrings:CrewDB" Microsoft.EntityFrameworkCore.SqlServer --output-dir Entities --force
@@ -32,6 +41,7 @@ builder.Services.AddDbContextFactory<CrewDbContext>(options =>
 
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: "ReactOrigin",

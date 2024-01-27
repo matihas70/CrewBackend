@@ -97,8 +97,11 @@ namespace CrewBackend.Services
                 CreateDate = DateTime.Now
             };
             response.Status = Enums.StatusEnum.Ok;
-            response.ResponseData.guid = guid;
-            response.ResponseData.token = CreateToken(dto.Email);
+            response.ResponseData = new LoginOutput
+            {
+                guid = guid,
+                token = CreateToken(user)
+            };
             return response;
         }
         public string GetToken(string sessionString)
@@ -116,21 +119,23 @@ namespace CrewBackend.Services
             {
                 return null;
             }
-            return CreateToken(session.User.Email);
-            return null;
+            return CreateToken(session.User);
         }
-        private string CreateToken(string email)
+        private string CreateToken(User user)
         {
             List<Claim> claims = new List<Claim> {
-                new Claim(ClaimTypes.Email, email)
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
-                config.GetSection("AppSettings:Token").Value));
+                config.GetSection("Jwt:Key").Value));
 
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature);
 
             var token = new JwtSecurityToken(
+                    issuer: config.GetSection("Jwt:Issuer").Value,
+                    audience: config.GetSection("Jwt:Audience").Value,
                     claims: claims,
                     expires: DateTime.Now.AddMinutes(30),
                     signingCredentials: creds

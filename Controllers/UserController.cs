@@ -1,105 +1,30 @@
-﻿using CrewBackend.Consts;
-using CrewBackend.Interfaces;
+﻿using CrewBackend.Interfaces;
 using CrewBackend.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using System;
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Text;
 
 namespace CrewBackend.Controllers
 {
     [ApiController]
-    [Route("Account")]
+    [Route("User")]
+    [Authorize]
     public class UserController : Controller
     {
-        private readonly IAccountService accountService;
+        private readonly IUserService userService;
+        public UserController(IUserService _userService)
+            => userService = _userService;
 
-        public UserController(IAccountService _accountService, IConfiguration _config)
-            =>  (accountService) = (_accountService);
-
-        [HttpPost("Login")]
-        public IActionResult Login(LoginUserDto dto)
+        [HttpGet]
+        public IActionResult GetUserData()
         {
-            ResponseModel<LoginOutput> response = accountService.Login(dto);
-            if (response.Status == Enums.StatusEnum.NotFound)
-            {
-                return NotFound(response.Message);
-            }   
-            else if(response.Status == Enums.StatusEnum.AuthenticationError)
-            {
-                return BadRequest(response.Message);
-            }
-            Response.Cookies.Append("Session", response.ResponseData.ToString(),
-                new CookieOptions
-                {
-                    Domain = Request.Host.ToString(),
-                    HttpOnly = true
-                });
+            var identity = Request.HttpContext.User.Identity as ClaimsIdentity;
+            long id = Int64.Parse(identity.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            ResponseModel<UserDataDto> response = userService.GetUserData(id);
+            if(response.Status == Enums.StatusEnum.Ok)
+                return Ok(response.ResponseData);
 
-            return Ok(response.ResponseData.token);
-        }
-
-        [HttpPost("newToken")]
-        public IActionResult CheckSession()
-        {
-            string session = Request.Cookies["Session"];
-            if (session.IsNullOrEmpty()) 
-            {
-                Response.Cookies.Delete("Session");
-                return Redirect(Urls.Front.Login);
-            }
-            string token = accountService.GetToken(session);
-            if (token == null)
-            {
-                Response.Cookies.Delete("Session");
-                return Redirect(Urls.Front.Login);
-            }
-
-            return Ok(token);
-        }
-
-        
-
-        [HttpPost("Register")]
-        public IActionResult Register([FromBody]RegisterUserDto dto)
-        {
-            ResponseModel<object> response = accountService.Register(dto, CreateActivationLink());
-            if (response.Status == Enums.StatusEnum.ResourceExist)
-                return BadRequest(response);
-
-            return Created();
-        }
-        [HttpPost("SendActivationMail")]
-        public IActionResult SendActivationMail([FromBody]string email)
-        {
-            ResponseModel<object> response = accountService.SendActivationMail(email, CreateActivationLink());
-            if (response.Status == Enums.StatusEnum.NotFound)
-                return NotFound(response);
-            else if (response.Status == Enums.StatusEnum.ResourceExist)
-                return BadRequest(response);
-
-            return NoContent();
-        }
-
-        private string CreateActivationLink()
-        {
-            return "https://" + Request.Host.ToString() + "/Account/activate/";
-        }
-
-        [HttpGet("activate/{id}")]
-        public IActionResult ActivateAccount([FromRoute]string id)
-        {
-            ResponseModel<object> response = accountService.ActiveAccount(Guid.Parse(id));
-            if(response.Status == Enums.StatusEnum.NotFound)
-                return BadRequest(response);
-            else if(response.Status == Enums.StatusEnum.Expired)
-                return Redirect(Urls.Front.Activated + "?isActivated=false");
-            
-
-            return Redirect(Urls.Front.Activated + "?isActivated=true");
+            return BadRequest();
         }
     }
 }
