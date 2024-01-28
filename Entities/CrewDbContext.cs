@@ -82,14 +82,13 @@ public partial class CrewDbContext : DbContext
 
         modelBuilder.Entity<Session>(entity =>
         {
-            entity.HasNoKey();
-
+            entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.CreateDate)
                 .HasColumnType("datetime")
                 .HasColumnName("Create_date");
             entity.Property(e => e.UserId).HasColumnName("User_id");
 
-            entity.HasOne(d => d.User).WithMany()
+            entity.HasOne(d => d.User).WithMany(p => p.Sessions)
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("FK_Session_User");
         });

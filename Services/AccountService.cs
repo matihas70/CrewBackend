@@ -96,6 +96,8 @@ namespace CrewBackend.Services
                 UserId = user.Id,
                 CreateDate = DateTime.Now
             };
+            db.Sessions.Add(session);
+            db.SaveChanges();
             response.Status = Enums.StatusEnum.Ok;
             response.ResponseData = new LoginOutput
             {

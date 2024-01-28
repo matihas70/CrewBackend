@@ -24,4 +24,6 @@ public partial class User
     public byte Activated { get; set; }
 
     public virtual ICollection<ActivateAccountRequest> ActivateAccountRequests { get; set; } = new List<ActivateAccountRequest>();
+
+    public virtual ICollection<Session> Sessions { get; set; } = new List<Session>();
 }

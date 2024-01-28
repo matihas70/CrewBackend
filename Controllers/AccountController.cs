@@ -35,10 +35,11 @@ namespace CrewBackend.Controllers
             Response.Cookies.Append("Session", response.ResponseData.guid.ToString(),
                 new CookieOptions
                 {
-                    Domain = Request.Host.ToString(),
+                    HttpOnly = true,
+                    Expires = DateTime.UtcNow.AddDays(7),
+                    IsEssential = true,
                     SameSite = SameSiteMode.None,
-                    Secure = false,
-                    HttpOnly = true
+                    Secure = true
                 });
 
             return Ok(response.ResponseData.token);
@@ -51,13 +52,13 @@ namespace CrewBackend.Controllers
             if (session.IsNullOrEmpty()) 
             {
                 Response.Cookies.Delete("Session");
-                return Redirect(Urls.Front.Login);
+                return Unauthorized();
             }
             string token = accountService.GetToken(session);
             if (token == null)
             {
                 Response.Cookies.Delete("Session");
-                return Redirect(Urls.Front.Login);
+                return Unauthorized();
             }
 
             return Ok(token);

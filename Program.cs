@@ -28,12 +28,12 @@ builder.Services.AddAuthentication(options =>
         ValidIssuer = builder.Configuration.GetSection("Jwt:Issuer").Value
     };
 });
-builder.Services.Configure<CookiePolicyOptions>(options =>
-{
-    options.MinimumSameSitePolicy = SameSiteMode.None;
-    options.HttpOnly = HttpOnlyPolicy.None;
-    options.Secure = CookieSecurePolicy.None;
-});
+//builder.Services.Configure<CookiePolicyOptions>(options =>
+//{
+//    options.MinimumSameSitePolicy = SameSiteMode.None;
+//    options.HttpOnly = HttpOnlyPolicy.None;
+//    options.Secure = CookieSecurePolicy.None;
+//});
 builder.Services.AddControllers();
 //dotnet ef dbcontext scaffold "Name=ConnectionStrings:CrewDB" Microsoft.EntityFrameworkCore.SqlServer --output-dir Entities --force
 builder.Services.AddDbContextFactory<CrewDbContext>(options =>
@@ -47,10 +47,11 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: "ReactOrigin",
     policy =>
     {
-        policy.WithOrigins("http://localhost:5173")
+        policy.WithOrigins(["http://localhost:5173", "https://localhost:5173"])
         .AllowAnyHeader()
         .AllowAnyMethod()
-        .AllowCredentials();
+        .AllowCredentials()
+        .SetIsOriginAllowed(h => true);
         //.WithExposedHeaders("Myheader");
     });
 });
