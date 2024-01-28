@@ -64,8 +64,6 @@ namespace CrewBackend.Controllers
             return Ok(token);
         }
 
-        
-
         [HttpPost("Register")]
         public IActionResult Register([FromBody]RegisterUserDto dto)
         {
@@ -74,6 +72,25 @@ namespace CrewBackend.Controllers
                 return BadRequest(response);
 
             return Created();
+        }
+        [HttpPost("Logout")]
+        public IActionResult Logout()
+        {
+            string? session = Request.Cookies["Session"];
+            Response.Cookies.Delete("Session", new CookieOptions
+            {
+                SameSite = SameSiteMode.None,
+                Secure = true
+            });
+            if (session.IsNullOrEmpty())
+            {
+                return Unauthorized();
+            }
+            if (!accountService.Logout(session))
+            {
+                return Unauthorized();
+            }
+            return NoContent();
         }
         [HttpPost("SendActivationMail")]
         public IActionResult SendActivationMail([FromBody]string email)

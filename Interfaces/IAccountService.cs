@@ -9,6 +9,7 @@ namespace CrewBackend.Interfaces
         string GetToken(string sessionString);
         ResponseModel<object> SendActivationMail(string email, string link);
         ResponseModel<object> ActiveAccount(Guid id);
+        bool Logout(string session);
 
     }
 }

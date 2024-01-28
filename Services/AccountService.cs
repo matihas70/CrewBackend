@@ -131,7 +131,7 @@ namespace CrewBackend.Services
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
-                config.GetSection("Jwt:Key").Value));
+                config.GetSection("Jwt:Key").Value!));
 
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature);
 
@@ -145,6 +145,19 @@ namespace CrewBackend.Services
 
             var jwt = new JwtSecurityTokenHandler().WriteToken(token);
             return jwt;
+        }
+        public bool Logout(string sessionString)
+        {
+            if(!Guid.TryParse(sessionString, out Guid sessionGuid))
+            {
+                return false;
+            }
+            using CrewDbContext db = dbFactory.CreateDbContext();
+
+            Session session = new Session { Id = sessionGuid };
+            db.Sessions.Remove(session);
+            db.SaveChanges();
+            return true;
         }
         public ResponseModel<object> SendActivationMail(string email, string link)
         {
