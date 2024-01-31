@@ -1,4 +1,5 @@
-﻿using CrewBackend.Entities;
+﻿using CrewBackend.Consts;
+using CrewBackend.Entities;
 using CrewBackend.Interfaces;
 using CrewBackend.Models;
 using CrewBackend.Models.Dto;
@@ -39,6 +40,23 @@ namespace CrewBackend.Services
         {
             return null;
         }
+        public ResponseModel<byte[]> GetProfilePicture(long userId)
+        {
+            using CrewDbContext db = dbFactory.CreateDbContext();
+            ResponseModel<byte[]> response = new ResponseModel<byte[]>();
+            string? pictureName = db.Users.FirstOrDefault(u => u.Id == userId)?.Picture;
+            if(pictureName == null)
+            {
+                response.Status = Enums.StatusEnum.NotFound;
+                response.Message = "Picture not found";
+                return response;
+            }
+            string path = Directories.ProfilePictures + $"\\{userId}\\{pictureName}.jpg";
+            response.ResponseData = File.ReadAllBytes(path);
+            response.Status = Enums.StatusEnum.Ok;
+            return response;
+        }
+
         public bool SaveUserProfilePicture(long userId, byte[] pictureBytes)
         {
             try

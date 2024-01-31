@@ -6,5 +6,6 @@ namespace CrewBackend.Interfaces
     {
         ResponseModel<UserDataDto> GetUserData(long id);
         bool SaveUserProfilePicture(long userId, byte[] pictureBytes);
+        ResponseModel<byte[]> GetProfilePicture(long userId);
     }
 }

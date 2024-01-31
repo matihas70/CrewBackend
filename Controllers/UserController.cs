@@ -30,6 +30,19 @@ namespace CrewBackend.Controllers
         {
             return null;
         }
+        [HttpGet("ProfilePicture")]
+        public IActionResult GetProfilePicture()
+        {
+            long userId = GetUserId();
+            ResponseModel<byte[]> response = userService.GetProfilePicture(userId);
+
+            if(response.Status == Enums.StatusEnum.NotFound)
+            {
+                return NotFound();
+            }
+            return File(response.ResponseData, "image/jpg");
+
+        }
         [HttpPatch("SaveProfilePhoto")]
         public async Task<IActionResult> SaveUserPhoto()
         {
