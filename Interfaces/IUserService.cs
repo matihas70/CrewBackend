@@ -1,4 +1,5 @@
 ﻿using CrewBackend.Models;
+using CrewBackend.Models.Dto;
 
 namespace CrewBackend.Interfaces
 {
@@ -7,5 +8,6 @@ namespace CrewBackend.Interfaces
         ResponseModel<UserDataDto> GetUserData(long id);
         bool SaveUserProfilePicture(long userId, byte[] pictureBytes);
         ResponseModel<byte[]> GetProfilePicture(long userId);
+        ResponseModel<object> SaveUserData(SaveUserDataDto dto, long userId);
     }
 }

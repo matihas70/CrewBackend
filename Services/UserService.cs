@@ -56,6 +56,30 @@ namespace CrewBackend.Services
             response.Status = Enums.StatusEnum.Ok;
             return response;
         }
+        public ResponseModel<object> SaveUserData(SaveUserDataDto dto, long userId)
+        {
+            ResponseModel<object> response = new ResponseModel<object>();
+
+            using CrewDbContext db = dbFactory.CreateDbContext();
+
+            User? user = db.Users.FirstOrDefault(u => u.Id == userId);
+
+            if (user == null)
+            {
+                response.Status = Enums.StatusEnum.NotFound;
+                response.Message = "User not found";
+                return response;
+            }
+
+            user.Name = dto.Name;
+            user.Surname = dto.Surname;
+            user.Callname = dto.Callname;
+
+            db.SaveChanges();
+            response.Status = Enums.StatusEnum.Ok;
+            return response;
+        
+        }
 
         public bool SaveUserProfilePicture(long userId, byte[] pictureBytes)
         {

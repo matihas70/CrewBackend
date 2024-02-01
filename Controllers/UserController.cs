@@ -1,5 +1,6 @@
 ﻿using CrewBackend.Interfaces;
 using CrewBackend.Models;
+using CrewBackend.Models.Dto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -20,13 +21,13 @@ namespace CrewBackend.Controllers
         {
             long id = GetUserId();
             ResponseModel<UserDataDto> response = userService.GetUserData(id);
-            if(response.Status == Enums.StatusEnum.Ok)
+            if (response.Status == Enums.StatusEnum.Ok)
                 return Ok(response.ResponseData);
 
             return BadRequest();
         }
         [HttpGet("ProfilePhoto")]
-        public IActionResult GetUserProfilePhoto([FromQuery]long id)
+        public IActionResult GetUserProfilePhoto([FromQuery] long id)
         {
             return null;
         }
@@ -36,11 +37,25 @@ namespace CrewBackend.Controllers
             long userId = GetUserId();
             ResponseModel<byte[]> response = userService.GetProfilePicture(userId);
 
-            if(response.Status == Enums.StatusEnum.NotFound)
+            if (response.Status == Enums.StatusEnum.NotFound)
             {
                 return NotFound();
             }
             return File(response.ResponseData, "image/jpg");
+
+        }
+
+        [HttpPatch]
+        public IActionResult SaveUserData([FromBody] SaveUserDataDto dto)
+        {
+            ResponseModel<object> response = userService.SaveUserData(dto, GetUserId());
+
+            if(response.Status == Enums.StatusEnum.NotFound)
+            {
+                return BadRequest();
+            }
+
+            return Ok("Saved successfuly");
 
         }
         [HttpPatch("SaveProfilePhoto")]

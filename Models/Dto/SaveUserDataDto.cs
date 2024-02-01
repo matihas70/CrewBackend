@@ -1,6 +1,6 @@
 ﻿namespace CrewBackend.Models.Dto
 {
-    public class SaveUserDataDto(
+    public record SaveUserDataDto(
             string Name,
             string Surname,
             string Callname
