@@ -26,12 +26,7 @@ namespace CrewBackend.Controllers
 
             return BadRequest();
         }
-        [HttpGet("ProfilePhoto")]
-        public IActionResult GetUserProfilePhoto([FromQuery] long id)
-        {
-            return null;
-        }
-        [HttpGet("ProfilePicture")]
+        [HttpGet("Photo")]
         public IActionResult GetProfilePicture()
         {
             long userId = GetUserId();
@@ -58,7 +53,7 @@ namespace CrewBackend.Controllers
             return Ok("Saved successfuly");
 
         }
-        [HttpPatch("SaveProfilePhoto")]
+        [HttpPatch("Photo")]
         public async Task<IActionResult> SaveUserPhoto()
         {
             long userId = GetUserId();
