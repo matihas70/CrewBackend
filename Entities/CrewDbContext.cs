@@ -21,9 +21,15 @@ public partial class CrewDbContext : DbContext
 
     public virtual DbSet<Group> Groups { get; set; }
 
+    public virtual DbSet<Role> Roles { get; set; }
+
     public virtual DbSet<Session> Sessions { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
+
+    public virtual DbSet<UserEducation> UserEducations { get; set; }
+
+    public virtual DbSet<UsersGroup> UsersGroups { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer("Name=ConnectionStrings:CrewDB");
@@ -80,6 +86,14 @@ public partial class CrewDbContext : DbContext
             entity.Property(e => e.Picture).IsUnicode(false);
         });
 
+        modelBuilder.Entity<Role>(entity =>
+        {
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.Name)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+        });
+
         modelBuilder.Entity<Session>(entity =>
         {
             entity.Property(e => e.Id).ValueGeneratedNever();
@@ -114,6 +128,46 @@ public partial class CrewDbContext : DbContext
             entity.Property(e => e.Surname)
                 .HasMaxLength(200)
                 .IsUnicode(false);
+        });
+
+        modelBuilder.Entity<UserEducation>(entity =>
+        {
+            entity.ToTable("User_educations");
+
+            entity.Property(e => e.AdditionalInfo)
+                .IsUnicode(false)
+                .HasColumnName("Additional_info");
+            entity.Property(e => e.DateFrom).HasColumnName("Date_from");
+            entity.Property(e => e.DateTo).HasColumnName("Date_to");
+            entity.Property(e => e.Degree)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            entity.Property(e => e.Field).IsUnicode(false);
+            entity.Property(e => e.SchoolName)
+                .IsUnicode(false)
+                .HasColumnName("School_name");
+            entity.Property(e => e.UserId).HasColumnName("User_id");
+
+            entity.HasOne(d => d.User).WithMany(p => p.UserEducations)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("FK_User_education");
+        });
+
+        modelBuilder.Entity<UsersGroup>(entity =>
+        {
+            entity.ToTable("Users_groups");
+
+            entity.Property(e => e.GroupId).HasColumnName("Group_id");
+            entity.Property(e => e.RoleId).HasColumnName("Role_id");
+            entity.Property(e => e.UserId).HasColumnName("User_id");
+
+            entity.HasOne(d => d.Group).WithMany(p => p.UsersGroups)
+                .HasForeignKey(d => d.GroupId)
+                .HasConstraintName("FK_Users_groups_groups");
+
+            entity.HasOne(d => d.User).WithMany(p => p.UsersGroups)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("FK_Users_groups_user");
         });
 
         OnModelCreatingPartial(modelBuilder);

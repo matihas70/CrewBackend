@@ -1,4 +1,4 @@
-﻿namespace CrewBackend.Enums
+﻿namespace CrewBackend.Data.Enums
 {
     public enum StatusEnum
     {

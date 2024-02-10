@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using CrewBackend.Data.Enums;
 
 namespace CrewBackend.Services
 {
@@ -26,7 +27,7 @@ namespace CrewBackend.Services
             ResponseModel<object> response = new ResponseModel<object>();
             if (db.Users.Any(u => u.Email == dto.Email))
             {
-                response.Status = Enums.StatusEnum.ResourceExist;
+                response.Status = StatusEnum.ResourceExist;
                 response.Message = "Account with given name already exist";
                 return response;
             }
@@ -56,7 +57,7 @@ namespace CrewBackend.Services
             emailService.SendActivateMail(dto.Email, link + guid);
             db.SaveChanges();
 
-            response.Status = Enums.StatusEnum.Ok;
+            response.Status = StatusEnum.Ok;
             return response;
         }
         public ResponseModel<LoginOutput> Login(LoginUserDto dto)
@@ -67,7 +68,7 @@ namespace CrewBackend.Services
             ResponseModel<LoginOutput> response = new ResponseModel<LoginOutput>();
             if (user == null)
             {
-                response.Status = Enums.StatusEnum.AuthenticationError;
+                response.Status = StatusEnum.AuthenticationError;
                 response.Message = "Wrong email or password";
                 return response;
             }
@@ -77,14 +78,14 @@ namespace CrewBackend.Services
             string hashedPasswordString = Convert.ToBase64String(hashedPassword); ;
             if(hashedPasswordString != user.Password)
             {
-                response.Status = Enums.StatusEnum.AuthenticationError;
+                response.Status = StatusEnum.AuthenticationError;
                 response.Message = "Wrong email or password";
                 return response;
             }
 
             if (user.Activated == 0)
             {
-                response.Status = Enums.StatusEnum.AuthenticationError;
+                response.Status = StatusEnum.AuthenticationError;
                 response.Message = "Account not activated";
                 return response;
             }
@@ -98,7 +99,7 @@ namespace CrewBackend.Services
             };
             db.Sessions.Add(session);
             db.SaveChanges();
-            response.Status = Enums.StatusEnum.Ok;
+            response.Status = StatusEnum.Ok;
             response.ResponseData = new LoginOutput
             {
                 guid = guid,
@@ -166,13 +167,13 @@ namespace CrewBackend.Services
             User user = db.Users.FirstOrDefault(u => u.Email == email);
             if (user == null)
             {
-                response.Status= Enums.StatusEnum.NotFound;
+                response.Status= StatusEnum.NotFound;
                 response.Message = "User with this email doesn't exist";
                 return response;
             }
             else if (user.Activated == 1)
             {
-                response.Status = Enums.StatusEnum.ResourceExist;
+                response.Status = StatusEnum.ResourceExist;
                 response.Message = "User is already activated";
                 return response;
             }
@@ -186,7 +187,7 @@ namespace CrewBackend.Services
             db.ActivateAccountRequests.Add(activeRequest);
             db.SaveChanges();
             emailService.SendActivateMail(email, link);
-            response.Status = Enums.StatusEnum.Ok;
+            response.Status = StatusEnum.Ok;
             response.Message = "Email has been sent";
             return response;
         }
@@ -199,12 +200,12 @@ namespace CrewBackend.Services
             ResponseModel<object> response = new ResponseModel<object>();
             if (activateRequest == null)
             {
-                response.Status = Enums.StatusEnum.NotFound;
+                response.Status = StatusEnum.NotFound;
                 return response;
             }
             else if (DateTime.Now > activateRequest.ExpirationDate)
             {
-                response.Status = Enums.StatusEnum.Expired;
+                response.Status = StatusEnum.Expired;
                 response.Message = "Link is expired";
                 return response;
             }
@@ -213,7 +214,7 @@ namespace CrewBackend.Services
             db.ActivateAccountRequests.Remove(activateRequest);
             db.SaveChanges();
 
-            response.Status = Enums.StatusEnum.Ok;
+            response.Status = StatusEnum.Ok;
             return response;
         }
     }

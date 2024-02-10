@@ -1,4 +1,4 @@
-﻿namespace CrewBackend.Consts
+﻿namespace CrewBackend.Data.Consts
 {
     public class Directories
     {

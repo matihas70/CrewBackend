@@ -1,4 +1,4 @@
-﻿namespace CrewBackend.Consts
+﻿namespace CrewBackend.Data.Consts
 {
     public static class Urls
     {
@@ -10,7 +10,7 @@
             public static readonly string Activated = Account + "/activated";
             public static readonly string Login = Account + "/login";
         }
-        
-        
+
+
     }
 }

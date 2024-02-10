@@ -1,4 +1,4 @@
-﻿using CrewBackend.Consts;
+﻿using CrewBackend.Data.Consts;
 using CrewBackend.Entities;
 using Microsoft.EntityFrameworkCore;
 using System.Net;

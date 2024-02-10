@@ -1,4 +1,4 @@
-﻿using CrewBackend.Consts;
+﻿using CrewBackend.Data.Consts;
 using CrewBackend.Interfaces;
 using CrewBackend.Services;
 using Microsoft.AspNetCore.Mvc;

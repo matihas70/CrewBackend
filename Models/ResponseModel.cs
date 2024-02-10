@@ -1,4 +1,5 @@
-﻿using CrewBackend.Enums;
+﻿using CrewBackend.Data.Enums;
+
 namespace CrewBackend.Models
 {
     public class ResponseModel<T>

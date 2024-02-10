@@ -1,4 +1,5 @@
-﻿using CrewBackend.Interfaces;
+﻿using CrewBackend.Data.Enums;
+using CrewBackend.Interfaces;
 using CrewBackend.Models;
 using CrewBackend.Models.Dto;
 using Microsoft.AspNetCore.Authorization;
@@ -20,11 +21,22 @@ namespace CrewBackend.Controllers
         public IActionResult GetUserData()
         {
             long id = GetUserId();
-            ResponseModel<UserDataDto> response = userService.GetUserData(id);
-            if (response.Status == Enums.StatusEnum.Ok)
+            ResponseModel<GetUserDataDto> response = userService.GetUserData(id);
+            if (response.Status == StatusEnum.Ok)
                 return Ok(response.ResponseData);
 
             return BadRequest();
+        }
+        [HttpGet("Education")]
+        public IActionResult GetUserEducationData()
+        {
+            long id = GetUserId();
+            ResponseModel<List<GetUserEducationDto>> response = userService.GetUserEducationData(id);
+            if(response.Status == StatusEnum.NotFound)
+            {
+                return NotFound();
+            }
+            return Ok(new { dto = response.ResponseData, educationTypes = Data.Dictionaries.EducationTypes });
         }
         [HttpGet("Photo")]
         public IActionResult GetProfilePicture()
@@ -32,7 +44,7 @@ namespace CrewBackend.Controllers
             long userId = GetUserId();
             ResponseModel<byte[]> response = userService.GetProfilePicture(userId);
 
-            if (response.Status == Enums.StatusEnum.NotFound)
+            if (response.Status == StatusEnum.NotFound)
             {
                 return NotFound();
             }
@@ -45,7 +57,7 @@ namespace CrewBackend.Controllers
         {
             ResponseModel<object> response = userService.SaveUserData(dto, GetUserId());
 
-            if(response.Status == Enums.StatusEnum.NotFound)
+            if(response.Status == StatusEnum.NotFound)
             {
                 return BadRequest();
             }
@@ -63,7 +75,19 @@ namespace CrewBackend.Controllers
             userService.SaveUserProfilePicture(userId, imageBytes);
             return NoContent();
         }
+        [HttpPut("Education")]
+        public IActionResult SaveUserEducation([FromBody]List<SaveUserEducationDto> dto)
+        {
+            long userId = GetUserId();
+            ResponseModel<IEnumerable<long>> response = userService.SaveEducationData(dto, userId);
+            
+            if(response.Status == StatusEnum.NotFound)
+            {
+                return NotFound();
+            }
 
+            return Ok(response.ResponseData);
+        }
         private long GetUserId()
         {
             var identity = Request.HttpContext.User.Identity as ClaimsIdentity;

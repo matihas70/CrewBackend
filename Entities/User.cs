@@ -26,4 +26,8 @@ public partial class User
     public virtual ICollection<ActivateAccountRequest> ActivateAccountRequests { get; set; } = new List<ActivateAccountRequest>();
 
     public virtual ICollection<Session> Sessions { get; set; } = new List<Session>();
+
+    public virtual ICollection<UserEducation> UserEducations { get; set; } = new List<UserEducation>();
+
+    public virtual ICollection<UsersGroup> UsersGroups { get; set; } = new List<UsersGroup>();
 }

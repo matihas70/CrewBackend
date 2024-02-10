@@ -1,4 +1,5 @@
-﻿using CrewBackend.Consts;
+﻿using CrewBackend.Data.Consts;
+using CrewBackend.Data.Enums;
 using CrewBackend.Interfaces;
 using CrewBackend.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -24,11 +25,11 @@ namespace CrewBackend.Controllers
         public IActionResult Login(LoginUserDto dto)
         {
             ResponseModel<LoginOutput> response = accountService.Login(dto);
-            if (response.Status == Enums.StatusEnum.NotFound)
+            if (response.Status == StatusEnum.NotFound)
             {
                 return NotFound(response.Message);
             }   
-            else if(response.Status == Enums.StatusEnum.AuthenticationError)
+            else if(response.Status == StatusEnum.AuthenticationError)
             {
                 return BadRequest(response.Message);
             }
@@ -68,7 +69,7 @@ namespace CrewBackend.Controllers
         public IActionResult Register([FromBody]RegisterUserDto dto)
         {
             ResponseModel<object> response = accountService.Register(dto, CreateActivationLink());
-            if (response.Status == Enums.StatusEnum.ResourceExist)
+            if (response.Status == StatusEnum.ResourceExist)
                 return BadRequest(response);
 
             return Created();
@@ -96,9 +97,9 @@ namespace CrewBackend.Controllers
         public IActionResult SendActivationMail([FromBody]string email)
         {
             ResponseModel<object> response = accountService.SendActivationMail(email, CreateActivationLink());
-            if (response.Status == Enums.StatusEnum.NotFound)
+            if (response.Status == StatusEnum.NotFound)
                 return NotFound(response);
-            else if (response.Status == Enums.StatusEnum.ResourceExist)
+            else if (response.Status == StatusEnum.ResourceExist)
                 return BadRequest(response);
 
             return NoContent();
@@ -113,9 +114,9 @@ namespace CrewBackend.Controllers
         public IActionResult ActivateAccount([FromRoute]string id)
         {
             ResponseModel<object> response = accountService.ActiveAccount(Guid.Parse(id));
-            if(response.Status == Enums.StatusEnum.NotFound)
+            if(response.Status == StatusEnum.NotFound)
                 return BadRequest(response);
-            else if(response.Status == Enums.StatusEnum.Expired)
+            else if(response.Status == StatusEnum.Expired)
                 return Redirect(Urls.Front.Activated + "?isActivated=false");
             
 

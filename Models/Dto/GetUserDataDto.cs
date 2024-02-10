@@ -1,6 +1,6 @@
 ﻿namespace CrewBackend.Models
 {
-    public record UserDataDto(
+    public record GetUserDataDto(
         string Name,
         string Surname,
         string Email,
