@@ -35,6 +35,7 @@ builder.Services.AddAuthentication(options =>
 //    options.Secure = CookieSecurePolicy.None;
 //});
 builder.Services.AddControllers();
+builder.Services.AddHttpContextAccessor();
 //dotnet ef dbcontext scaffold "Name=ConnectionStrings:CrewDB" Microsoft.EntityFrameworkCore.SqlServer --output-dir Entities --force
 builder.Services.AddDbContextFactory<CrewDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("CrewDB")));
@@ -42,6 +43,7 @@ builder.Services.AddDbContextFactory<CrewDbContext>(options =>
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IUserContextInfo, UserContextInfo>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: "ReactOrigin",

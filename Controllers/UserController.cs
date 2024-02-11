@@ -13,9 +13,10 @@ namespace CrewBackend.Controllers
     [Authorize]
     public class UserController : Controller
     {
+        private readonly IUserContextInfo userContextInfo;
         private readonly IUserService userService;
-        public UserController(IUserService _userService)
-            => userService = _userService;
+        public UserController(IUserContextInfo _userContextInfo, IUserService _userService) => 
+            (userContextInfo, userService) = (_userContextInfo, _userService);
 
         [HttpGet]
         public IActionResult GetUserData()
