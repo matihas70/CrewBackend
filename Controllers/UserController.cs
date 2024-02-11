@@ -21,7 +21,7 @@ namespace CrewBackend.Controllers
         [HttpGet]
         public IActionResult GetUserData()
         {
-            long id = GetUserId();
+            long id = userContextInfo.GetUserId();
             ResponseModel<GetUserDataDto> response = userService.GetUserData(id);
             if (response.Status == StatusEnum.Ok)
                 return Ok(response.ResponseData);
@@ -31,7 +31,7 @@ namespace CrewBackend.Controllers
         [HttpGet("Education")]
         public IActionResult GetUserEducationData()
         {
-            long id = GetUserId();
+            long id = userContextInfo.GetUserId();
             ResponseModel<List<GetUserEducationDto>> response = userService.GetUserEducationData(id);
             if(response.Status == StatusEnum.NotFound)
             {
@@ -42,7 +42,7 @@ namespace CrewBackend.Controllers
         [HttpGet("Photo")]
         public IActionResult GetProfilePicture()
         {
-            long userId = GetUserId();
+            long userId = userContextInfo.GetUserId();
             ResponseModel<byte[]> response = userService.GetProfilePicture(userId);
 
             if (response.Status == StatusEnum.NotFound)
@@ -56,7 +56,8 @@ namespace CrewBackend.Controllers
         [HttpPatch]
         public IActionResult SaveUserData([FromBody] SaveUserDataDto dto)
         {
-            ResponseModel<object> response = userService.SaveUserData(dto, GetUserId());
+            long userId = userContextInfo.GetUserId();
+            ResponseModel<object> response = userService.SaveUserData(dto, userId);
 
             if(response.Status == StatusEnum.NotFound)
             {
@@ -69,7 +70,7 @@ namespace CrewBackend.Controllers
         [HttpPatch("Photo")]
         public async Task<IActionResult> SaveUserPhoto()
         {
-            long userId = GetUserId();
+            long userId = userContextInfo.GetUserId();
             using var buffer = new System.IO.MemoryStream();
             await Request.Body.CopyToAsync(buffer);
             var imageBytes = buffer.ToArray();
@@ -79,7 +80,7 @@ namespace CrewBackend.Controllers
         [HttpPut("Education")]
         public IActionResult SaveUserEducation([FromBody]List<SaveUserEducationDto> dto)
         {
-            long userId = GetUserId();
+            long userId = userContextInfo.GetUserId();
             ResponseModel<IEnumerable<long>> response = userService.SaveEducationData(dto, userId);
             
             if(response.Status == StatusEnum.NotFound)
@@ -88,11 +89,6 @@ namespace CrewBackend.Controllers
             }
 
             return Ok(response.ResponseData);
-        }
-        private long GetUserId()
-        {
-            var identity = Request.HttpContext.User.Identity as ClaimsIdentity;
-            return Int64.Parse(identity.FindFirst(ClaimTypes.NameIdentifier)?.Value);
         }
     }
 }
