@@ -30,5 +30,13 @@ namespace CrewBackend.Controllers
             }
             return Created();
         }
+
+        [HttpPost("Post/{GroupId}")]
+        public IActionResult AddPostToGroup(CreateGroupPostDto dto, long groupId)
+        {
+            long userId = userContextInfo.GetUserId();
+            ResponseModel<object> response = groupsService.CreatePost(dto, userId, groupId);
+            return Ok();
+        }
     }
 }

@@ -4,9 +4,12 @@ using Microsoft.EntityFrameworkCore;
 using CrewBackend.Services;
 using CrewBackend.Middlewares;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.DependencyInjection;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.CookiePolicy;
+using CrewBackend.Models;
+using CrewBackend.Factories;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -41,10 +44,16 @@ builder.Services.AddDbContextFactory<CrewDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("CrewDB")));
 
 builder.Services.AddScoped<IAccountService, AccountService>();
-builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IGroupsService, GroupsService>();
 builder.Services.AddScoped<IUserContextInfo, UserContextInfo>();
+
+builder.Services.AddScoped<IGroupObserverFactory, GroupObserverFactory>();
+builder.Services.AddScoped<IGroupNotificatorFactory, GroupNotificatorFactory>();
+
+builder.Services.AddScoped<IEmailAccountService, EmailAccountService>();
+builder.Services.AddScoped<IEmailNotificationService, EmailNotificationService>();
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: "ReactOrigin",

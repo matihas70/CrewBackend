@@ -15,9 +15,9 @@ namespace CrewBackend.Services
     public class AccountService : IAccountService
     {
         private readonly IDbContextFactory<CrewDbContext> dbFactory;
-        private readonly IEmailService emailService;
+        private readonly IEmailAccountService emailService;
         private readonly IConfiguration config;
-        public AccountService(IDbContextFactory<CrewDbContext> _dbFactory, IEmailService _emailService, IConfiguration _config)
+        public AccountService(IDbContextFactory<CrewDbContext> _dbFactory, IEmailAccountService _emailService, IConfiguration _config)
             => (dbFactory, emailService, config) = (_dbFactory, _emailService, _config);
 
         

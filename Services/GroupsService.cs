@@ -3,13 +3,19 @@ using CrewBackend.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using CrewBackend.Models;
 using CrewBackend.Models.Dto;
+using CrewBackend.Factories;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using CrewBackend.Data.Enums;
 namespace CrewBackend.Services
 {
     public class GroupsService:IGroupsService
     {
         private readonly IDbContextFactory<CrewDbContext> dbFactory;
-        public GroupsService(IDbContextFactory<CrewDbContext> _dbFactory) =>
-            dbFactory = _dbFactory;
+        private readonly IGroupNotificatorFactory notificatorFactory;
+        private readonly IGroupObserverFactory groupObserverFactory;
+        public GroupsService(IDbContextFactory<CrewDbContext> _dbFactory, IGroupNotificatorFactory _notificatorFactory, IGroupObserverFactory _groupObserverFactory) =>
+            (dbFactory,  notificatorFactory, groupObserverFactory) = (_dbFactory, _notificatorFactory, _groupObserverFactory);
 
         public ResponseModel<object> CreateGroup(CreateGroupDto dto, long userId)
         {
@@ -47,5 +53,41 @@ namespace CrewBackend.Services
 
         }
 
+        public ResponseModel<object> CreatePost(CreateGroupPostDto dto, long userId, long groupId)
+        {
+            using var db = dbFactory.CreateDbContext();
+
+            ResponseModel<object> response = new ResponseModel<object>();
+            
+            string? groupName = db.Groups.FirstOrDefault(g => g.Id == groupId)?.Name;
+            if(groupName is null)
+            {
+                response.Status = StatusEnum.NotFound;
+                response.Message = "Group not found";
+                return response;
+            }
+            var notificationService = notificatorFactory.Create(groupId);
+            List<long> taggedMembersIds = JsonSerializer.Deserialize<List<long>>(dto.TaggedMembers)!;
+            foreach ( long id in taggedMembersIds)
+            {
+                var observer = groupObserverFactory.Create(id, userId, db);
+                notificationService.Attach(observer);
+            }
+            notificationService.SendNotifications();
+            GroupsPost groupPost = new GroupsPost
+            {
+                Title = dto.Title,
+                Body = dto.Body,
+                TaggedUsers = dto.TaggedMembers,
+                CreatedBy = userId,
+                CreateDate = DateTime.Now,
+                GroupId = groupId,
+            };
+
+            db.GroupsPosts.Add(groupPost);
+            db.SaveChanges();
+
+            return response;
+        }
     }
 }

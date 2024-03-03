@@ -15,5 +15,7 @@ public partial class Group
 
     public DateTime CreateDate { get; set; }
 
+    public virtual ICollection<GroupsPost> GroupsPosts { get; set; } = new List<GroupsPost>();
+
     public virtual ICollection<UsersGroup> UsersGroups { get; set; } = new List<UsersGroup>();
 }

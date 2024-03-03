@@ -21,6 +21,8 @@ public partial class CrewDbContext : DbContext
 
     public virtual DbSet<Group> Groups { get; set; }
 
+    public virtual DbSet<GroupsPost> GroupsPosts { get; set; }
+
     public virtual DbSet<Role> Roles { get; set; }
 
     public virtual DbSet<Session> Sessions { get; set; }
@@ -84,6 +86,33 @@ public partial class CrewDbContext : DbContext
             entity.Property(e => e.CreatedBy).HasColumnName("Created_by");
             entity.Property(e => e.Name).HasMaxLength(200);
             entity.Property(e => e.Picture).IsUnicode(false);
+        });
+
+        modelBuilder.Entity<GroupsPost>(entity =>
+        {
+            entity.ToTable("Groups_posts");
+
+            entity.Property(e => e.CreateDate)
+                .HasColumnType("datetime")
+                .HasColumnName("Create_date");
+            entity.Property(e => e.CreatedBy).HasColumnName("Created_by");
+            entity.Property(e => e.DeleteDate)
+                .HasColumnType("datetime")
+                .HasColumnName("Delete_date");
+            entity.Property(e => e.EditDate)
+                .HasColumnType("datetime")
+                .HasColumnName("Edit_date");
+            entity.Property(e => e.GroupId).HasColumnName("Group_id");
+            entity.Property(e => e.TaggedUsers).HasColumnName("Tagged_users");
+            entity.Property(e => e.Title).HasMaxLength(200);
+
+            entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.GroupsPosts)
+                .HasForeignKey(d => d.CreatedBy)
+                .HasConstraintName("FK_Groups_posts_user");
+
+            entity.HasOne(d => d.Group).WithMany(p => p.GroupsPosts)
+                .HasForeignKey(d => d.GroupId)
+                .HasConstraintName("FK_Groups_posts_group");
         });
 
         modelBuilder.Entity<Role>(entity =>
@@ -164,6 +193,10 @@ public partial class CrewDbContext : DbContext
             entity.HasOne(d => d.Group).WithMany(p => p.UsersGroups)
                 .HasForeignKey(d => d.GroupId)
                 .HasConstraintName("FK_Users_groups_groups");
+
+            entity.HasOne(d => d.Role).WithMany(p => p.UsersGroups)
+                .HasForeignKey(d => d.RoleId)
+                .HasConstraintName("FK_Users_groups_roles");
 
             entity.HasOne(d => d.User).WithMany(p => p.UsersGroups)
                 .HasForeignKey(d => d.UserId)
