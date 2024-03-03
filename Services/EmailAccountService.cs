@@ -9,7 +9,7 @@ namespace CrewBackend.Services
 {
     public class EmailAccountService : EmailSender, IEmailAccountService
     {
-        public EmailAccountService(IDbContextFactory<CrewDbContext> _dbFactory) : base(_dbFactory) { }
+        public EmailAccountService(CrewDbContext _db) : base(_db) { }
 
         public void SendActivateMail(string to, string activationLink)
         {

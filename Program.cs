@@ -40,8 +40,10 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddControllers();
 builder.Services.AddHttpContextAccessor();
 //dotnet ef dbcontext scaffold "Name=ConnectionStrings:CrewDB" Microsoft.EntityFrameworkCore.SqlServer --output-dir Entities --force
-builder.Services.AddDbContextFactory<CrewDbContext>(options =>
+builder.Services.AddDbContext<CrewDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("CrewDB")));
+//builder.Services.AddDbContextFactory<CrewDbContext>(options =>
+//    options.UseSqlServer(builder.Configuration.GetConnectionString("CrewDB")));
 
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IUserService, UserService>();

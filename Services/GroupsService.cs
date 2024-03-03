@@ -11,17 +11,15 @@ namespace CrewBackend.Services
 {
     public class GroupsService:IGroupsService
     {
-        private readonly IDbContextFactory<CrewDbContext> dbFactory;
+        private readonly CrewDbContext db;
         private readonly IGroupNotificatorFactory notificatorFactory;
         private readonly IGroupObserverFactory groupObserverFactory;
-        public GroupsService(IDbContextFactory<CrewDbContext> _dbFactory, IGroupNotificatorFactory _notificatorFactory, IGroupObserverFactory _groupObserverFactory) =>
-            (dbFactory,  notificatorFactory, groupObserverFactory) = (_dbFactory, _notificatorFactory, _groupObserverFactory);
+        public GroupsService(CrewDbContext _db, IGroupNotificatorFactory _notificatorFactory, IGroupObserverFactory _groupObserverFactory) =>
+            (db,  notificatorFactory, groupObserverFactory) = (_db, _notificatorFactory, _groupObserverFactory);
 
         public ResponseModel<object> CreateGroup(CreateGroupDto dto, long userId)
         {
             ResponseModel<object> response = new ResponseModel<object>();
-
-            using CrewDbContext db = dbFactory.CreateDbContext();
 
             if(db.Groups.Any(g => g.Name == dto.Name))
             {
@@ -55,8 +53,6 @@ namespace CrewBackend.Services
 
         public ResponseModel<object> CreatePost(CreateGroupPostDto dto, long userId, long groupId)
         {
-            using var db = dbFactory.CreateDbContext();
-
             ResponseModel<object> response = new ResponseModel<object>();
             
             string? groupName = db.Groups.FirstOrDefault(g => g.Id == groupId)?.Name;

@@ -8,12 +8,12 @@ namespace CrewBackend.Services
 {
     public abstract class EmailSender : IDisposable
     {
-        protected readonly IDbContextFactory<CrewDbContext> dbFactory;
+        protected readonly CrewDbContext db;
         private SmtpClient client = new SmtpClient();
         protected AppSetting settings;
-        public EmailSender(IDbContextFactory<CrewDbContext> _dbFactory)
+        public EmailSender(CrewDbContext _db)
         {
-            dbFactory = _dbFactory;
+            db = _db;
             LoadSettings();
             AuthenticateClient();
         }
@@ -33,7 +33,6 @@ namespace CrewBackend.Services
         }
         private void LoadSettings()
         {
-            using CrewDbContext db = dbFactory.CreateDbContext();
             settings = db.AppSettings.FirstOrDefault();
         }
         private void AuthenticateClient()

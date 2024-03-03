@@ -14,16 +14,15 @@ namespace CrewBackend.Services
 {
     public class AccountService : IAccountService
     {
-        private readonly IDbContextFactory<CrewDbContext> dbFactory;
+        private readonly CrewDbContext db;
         private readonly IEmailAccountService emailService;
         private readonly IConfiguration config;
-        public AccountService(IDbContextFactory<CrewDbContext> _dbFactory, IEmailAccountService _emailService, IConfiguration _config)
-            => (dbFactory, emailService, config) = (_dbFactory, _emailService, _config);
+        public AccountService(CrewDbContext _db, IEmailAccountService _emailService, IConfiguration _config)
+            => (db, emailService, config) = (_db, _emailService, _config);
 
         
         public ResponseModel<object> Register(RegisterUserDto dto, string link)
         {
-            using var db = dbFactory.CreateDbContext();
             ResponseModel<object> response = new ResponseModel<object>();
             if (db.Users.Any(u => u.Email == dto.Email))
             {
@@ -62,8 +61,6 @@ namespace CrewBackend.Services
         }
         public ResponseModel<LoginOutput> Login(LoginUserDto dto)
         {
-            using CrewDbContext db = dbFactory.CreateDbContext();
-
             User user = db.Users.FirstOrDefault(u => u.Email == dto.Email);
             ResponseModel<LoginOutput> response = new ResponseModel<LoginOutput>();
             if (user == null)
@@ -114,8 +111,6 @@ namespace CrewBackend.Services
                 return null;
             }
 
-            using CrewDbContext db = dbFactory.CreateDbContext();
-
             Session session = db.Sessions.Include(s => s.User).FirstOrDefault(s => s.Id == guid);
 
             if (session == null)
@@ -153,7 +148,6 @@ namespace CrewBackend.Services
             {
                 return false;
             }
-            using CrewDbContext db = dbFactory.CreateDbContext();
 
             Session session = new Session { Id = sessionGuid };
             db.Sessions.Remove(session);
@@ -162,7 +156,6 @@ namespace CrewBackend.Services
         }
         public ResponseModel<object> SendActivationMail(string email, string link)
         {
-            using CrewDbContext db = dbFactory.CreateDbContext();
             ResponseModel<object> response = new ResponseModel<object>();
             User user = db.Users.FirstOrDefault(u => u.Email == email);
             if (user == null)
@@ -194,7 +187,6 @@ namespace CrewBackend.Services
         
         public ResponseModel<object> ActiveAccount(Guid id)
         {
-            using CrewDbContext db = dbFactory.CreateDbContext();
             var activateRequest = db.ActivateAccountRequests
                                     .Include(x=>x.User).FirstOrDefault(x => x.Id == id);
             ResponseModel<object> response = new ResponseModel<object>();

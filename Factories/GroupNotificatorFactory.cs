@@ -6,13 +6,13 @@ namespace CrewBackend.Factories
 {
     public class GroupNotificatorFactory : IGroupNotificatorFactory
     {
-        private readonly IDbContextFactory<CrewDbContext> dbFactory;
+        private readonly CrewDbContext db;
         private readonly IEmailNotificationService emailNotificationService;
-        public GroupNotificatorFactory(IDbContextFactory<CrewDbContext> _dbFactory)
-            => (_dbFactory) = (dbFactory);
+        public GroupNotificatorFactory(CrewDbContext _db)
+            => (db) = (_db);
         public IGroupNotificator Create(long groupId)
         {
-            return new GroupMembersNotificator(dbFactory, groupId);
+            return new GroupMembersNotificator(db, groupId);
         }
     }
 }

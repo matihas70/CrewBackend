@@ -11,14 +11,12 @@ namespace CrewBackend.Services
 {
     public class UserService : IUserService
     {
-        private readonly IDbContextFactory<CrewDbContext> dbFactory;
-        public UserService(IDbContextFactory<CrewDbContext> _dbFactory) =>
-            dbFactory = _dbFactory;
+        private readonly CrewDbContext db;
+        public UserService(CrewDbContext _db) =>
+            db = _db;
 
         public ResponseModel<GetUserDataDto> GetUserData(long id)
         {
-            using CrewDbContext db = dbFactory.CreateDbContext();
-
             GetUserDataDto? userData = db.Users
                                        .Where(u => u.Id == id)
                                        .Select(u => new GetUserDataDto(
@@ -41,7 +39,6 @@ namespace CrewBackend.Services
         public ResponseModel<List<GetUserEducationDto>> GetUserEducationData(long id)
         {
             ResponseModel<List<GetUserEducationDto>> response = new ResponseModel<List<GetUserEducationDto>>();
-            using CrewDbContext db = dbFactory.CreateDbContext();
             var typesData = Data.Dictionaries.EducationTypes;
             List<GetUserEducationDto> data = db.Users.Include(u => u.UserEducations)
                                                .Where(u => u.Id == id)
@@ -66,10 +63,6 @@ namespace CrewBackend.Services
         }
         public ResponseModel<IEnumerable<long>> SaveEducationData(List<SaveUserEducationDto> dto, long userId)
         {
-            using CrewDbContext db = dbFactory.CreateDbContext();
-
-            
-
             ResponseModel<IEnumerable<long>> response = new ResponseModel<IEnumerable<long>>();
             
             if (!db.Users.Any(u => u.Id == userId))
@@ -112,7 +105,6 @@ namespace CrewBackend.Services
         }
         public ResponseModel<byte[]> GetProfilePicture(long userId)
         {
-            using CrewDbContext db = dbFactory.CreateDbContext();
             ResponseModel<byte[]> response = new ResponseModel<byte[]>();
             string? pictureName = db.Users.FirstOrDefault(u => u.Id == userId)?.Picture;
             if(pictureName == null)
@@ -129,8 +121,6 @@ namespace CrewBackend.Services
         public ResponseModel<object> SaveUserData(SaveUserDataDto dto, long userId)
         {
             ResponseModel<object> response = new ResponseModel<object>();
-
-            using CrewDbContext db = dbFactory.CreateDbContext();
 
             User? user = db.Users.FirstOrDefault(u => u.Id == userId);
 
@@ -164,8 +154,6 @@ namespace CrewBackend.Services
                 using FileStream fs = new FileStream(path + $"\\{guid}.jpg", FileMode.Create);
                 fs.Write(pictureBytes);
                 fs.Close();
-
-                using CrewDbContext db = dbFactory.CreateDbContext();
 
                 db.Users.FirstOrDefault(u => u.Id == userId).Picture = guid.ToString();
                 db.SaveChanges();

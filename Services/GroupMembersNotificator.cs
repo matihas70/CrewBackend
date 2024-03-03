@@ -6,11 +6,11 @@ namespace CrewBackend.Services
 {
     public class GroupMembersNotificator:IGroupNotificator
     {
-        private readonly IDbContextFactory<CrewDbContext> dbFactory;
+        private readonly CrewDbContext db;
         private readonly IEmailNotificationService notificationService;
         private readonly long groupId;
-        public GroupMembersNotificator(IDbContextFactory<CrewDbContext> _dbFactory, long _groupId) =>
-            (dbFactory, groupId) = (_dbFactory, _groupId);
+        public GroupMembersNotificator(CrewDbContext _db, long _groupId) =>
+            (db, groupId) = (_db, _groupId);
 
         private List<IGroupObserver> observers = [];
         public void Attach(IGroupObserver observer)
@@ -23,7 +23,6 @@ namespace CrewBackend.Services
         }
         public void SendNotifications()
         {
-            using CrewDbContext db = dbFactory.CreateDbContext();
             string? groupName = db.Groups.FirstOrDefault(g => g.Id == groupId)?.Name;
 
             if(groupName is null)

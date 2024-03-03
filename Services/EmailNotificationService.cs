@@ -6,7 +6,7 @@ namespace CrewBackend.Services
 {
     public class EmailNotificationService : EmailSender, IEmailNotificationService
     {
-        public EmailNotificationService(IDbContextFactory<CrewDbContext> _dbFactory) : base(_dbFactory)
+        public EmailNotificationService(CrewDbContext _db) : base(_db)
         {
 
         }
