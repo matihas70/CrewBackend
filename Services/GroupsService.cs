@@ -7,6 +7,7 @@ using CrewBackend.Factories;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using CrewBackend.Data.Enums;
+using Microsoft.AspNetCore.DataProtection.Repositories;
 namespace CrewBackend.Services
 {
     public class GroupsService:IGroupsService
@@ -50,6 +51,33 @@ namespace CrewBackend.Services
             return response;
 
         }
+        public ResponseModel<object> AddUserToGroup(long groupId, long userId)
+        {
+            ResponseModel<object> response = new ResponseModel<object>();
+            if(!db.Groups.Any(x => x.Id == groupId) || db.Users.Any(x => x.Id == userId)){
+                response.Status = StatusEnum.NotFound;
+                response.Message = "Resource not found";
+                return response;
+            }
+
+            if(db.UsersGroups.Any(x => x.UserId == userId && x.GroupId == groupId)){
+                response.Status = StatusEnum.ResourceExist;
+                response.Message = "Resource exist";
+                return response;
+            }
+            UsersGroup userGroup = new UsersGroup
+            {
+                UserId = userId,
+                GroupId = groupId,
+                RoleId = (int)Data.Enums.Roles.Member
+            };
+
+            db.UsersGroups.Add(userGroup);
+            response.Status = StatusEnum.Ok;
+            response.Message = "User added";
+            return response;
+
+        }
 
         public ResponseModel<object> CreatePost(CreateGroupPostDto dto, long userId, long groupId)
         {
@@ -82,6 +110,7 @@ namespace CrewBackend.Services
 
             db.GroupsPosts.Add(groupPost);
             db.SaveChanges();
+            response.Status = StatusEnum.Ok;
 
             return response;
         }

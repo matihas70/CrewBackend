@@ -30,12 +30,31 @@ namespace CrewBackend.Controllers
             }
             return Created();
         }
+        [HttpPost("{groupId}/{userToAddId}")]
+        public IActionResult AddUserToGroup(long groupId, long userToAddId)
+        {
+            ResponseModel<object> response = groupsService.AddUserToGroup(groupId, userToAddId);
+            if(response.Status == Data.Enums.StatusEnum.NotFound)
+            {
+                return NotFound(response.Message);
+            }
+            else if (response.Status == Data.Enums.StatusEnum.ResourceExist)
+            {
+                return BadRequest(response.Message);
+            }
+            return Created();
+        }
 
-        [HttpPost("Post/{GroupId}")]
+
+        [HttpPost("Post/{groupId}")]
         public IActionResult AddPostToGroup(CreateGroupPostDto dto, long groupId)
         {
             long userId = userContextInfo.GetUserId();
             ResponseModel<object> response = groupsService.CreatePost(dto, userId, groupId);
+            if (response.Status == Data.Enums.StatusEnum.NotFound)
+            {
+                return NotFound();
+            }
             return Ok();
         }
     }
