@@ -8,5 +8,6 @@ namespace CrewBackend.Interfaces
         ResponseModel<object> CreateGroup(CreateGroupDto dto, long userId);
         ResponseModel<object> CreatePost(CreateGroupPostDto dto, long userId, long groupId);
         ResponseModel<object> AddUserToGroup(long groupId, long userId);
+        ResponseModel<object> RemoveUserFromGroup(long groupId, long userId);
     }
 }

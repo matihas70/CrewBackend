@@ -54,7 +54,7 @@ namespace CrewBackend.Services
         public ResponseModel<object> AddUserToGroup(long groupId, long userId)
         {
             ResponseModel<object> response = new ResponseModel<object>();
-            if(!db.Groups.Any(x => x.Id == groupId) || db.Users.Any(x => x.Id == userId)){
+            if(!db.Groups.Any(x => x.Id == groupId) || !db.Users.Any(x => x.Id == userId)){
                 response.Status = StatusEnum.NotFound;
                 response.Message = "Resource not found";
                 return response;
@@ -77,6 +77,18 @@ namespace CrewBackend.Services
             response.Message = "User added";
             return response;
 
+        }
+        public ResponseModel<object> RemoveUserFromGroup(long groupId, long userId)
+        {
+            ResponseModel<object> response = new ResponseModel<object>();
+            if(!db.UsersGroups.Any(x => x.GroupId == groupId && x.UserId == userId))
+            {
+                response.Status = StatusEnum.NotFound;
+                response.Message = "Resource not found";
+            }
+            db.UsersGroups.Where(x => x.GroupId == groupId && x.UserId == userId).ExecuteDelete();
+            response.Status = StatusEnum.Ok;
+            return response;
         }
 
         public ResponseModel<object> CreatePost(CreateGroupPostDto dto, long userId, long groupId)
