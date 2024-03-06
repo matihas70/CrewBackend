@@ -8,6 +8,7 @@
         ResourceExist = 3,
         AuthenticationError = 4,
         Expired = 5,
+        AuthorizationError = 6,
         UnknownError = 1000,
     }
 }

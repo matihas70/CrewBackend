@@ -5,6 +5,7 @@ using CrewBackend.Models.Dto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using CrewBackend.Data.Enums;
 
 namespace CrewBackend.Controllers
 {
@@ -24,7 +25,7 @@ namespace CrewBackend.Controllers
         {
             long userId = userContextInfo.GetUserId();
             ResponseModel<object> response = groupsService.CreateGroup(dto, userId);
-            if(response.Status == Data.Enums.StatusEnum.ResourceExist)
+            if(response.Status == StatusEnum.ResourceExist)
             {
                 return BadRequest(response.Message);
             }
@@ -34,13 +35,17 @@ namespace CrewBackend.Controllers
         public IActionResult AddUserToGroup(long groupId, long userToAddId)
         {
             ResponseModel<object> response = groupsService.AddUserToGroup(groupId, userToAddId);
-            if(response.Status == Data.Enums.StatusEnum.NotFound)
+            if(response.Status == StatusEnum.NotFound)
             {
                 return NotFound(response.Message);
             }
-            else if (response.Status == Data.Enums.StatusEnum.ResourceExist)
+            else if (response.Status == StatusEnum.ResourceExist)
             {
                 return BadRequest(response.Message);
+            }
+            else if(response.Status == StatusEnum.AuthorizationError)
+            {
+                return Unauthorized();
             }
             return Created();
         }
@@ -51,6 +56,10 @@ namespace CrewBackend.Controllers
             if(response.Status == Data.Enums.StatusEnum.NotFound)
             {
                 return NotFound(response.Message);
+            }
+            else if (response.Status == StatusEnum.AuthorizationError)
+            {
+                return Unauthorized();
             }
             return NoContent();
         }

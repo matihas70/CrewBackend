@@ -48,7 +48,10 @@ builder.Services.AddDbContext<CrewDbContext>(options =>
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IGroupsService, GroupsService>();
+
 builder.Services.AddScoped<IUserContextInfo, UserContextInfo>();
+
+builder.Services.AddScoped<IRolesValidator, RolesValidator>();
 
 builder.Services.AddScoped<IGroupObserverFactory, GroupObserverFactory>();
 builder.Services.AddScoped<IGroupNotificatorFactory, GroupNotificatorFactory>();

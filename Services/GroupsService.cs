@@ -15,8 +15,9 @@ namespace CrewBackend.Services
         private readonly CrewDbContext db;
         private readonly IGroupNotificatorFactory notificatorFactory;
         private readonly IGroupObserverFactory groupObserverFactory;
-        public GroupsService(CrewDbContext _db, IGroupNotificatorFactory _notificatorFactory, IGroupObserverFactory _groupObserverFactory) =>
-            (db,  notificatorFactory, groupObserverFactory) = (_db, _notificatorFactory, _groupObserverFactory);
+        private readonly IRolesValidator rolesValidator;
+        public GroupsService(CrewDbContext _db, IGroupNotificatorFactory _notificatorFactory, IGroupObserverFactory _groupObserverFactory, IRolesValidator _rolesValidator) =>
+            (db,  notificatorFactory, groupObserverFactory, rolesValidator) = (_db, _notificatorFactory, _groupObserverFactory, _rolesValidator);
 
         public ResponseModel<object> CreateGroup(CreateGroupDto dto, long userId)
         {
@@ -81,6 +82,11 @@ namespace CrewBackend.Services
         public ResponseModel<object> RemoveUserFromGroup(long groupId, long userId)
         {
             ResponseModel<object> response = new ResponseModel<object>();
+            if (!rolesValidator.IsAdmin(userId, groupId)){
+                response.Status = StatusEnum.AuthorizationError;
+                return response;
+            }
+            
             if(!db.UsersGroups.Any(x => x.GroupId == groupId && x.UserId == userId))
             {
                 response.Status = StatusEnum.NotFound;
