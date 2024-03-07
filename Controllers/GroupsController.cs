@@ -34,7 +34,8 @@ namespace CrewBackend.Controllers
         [HttpPost("{groupId}/{userToAddId}")]
         public IActionResult AddUserToGroup(long groupId, long userToAddId)
         {
-            ResponseModel<object> response = groupsService.AddUserToGroup(groupId, userToAddId);
+            long userId = userContextInfo.GetUserId();
+            ResponseModel<object> response = groupsService.AddUserToGroup(groupId, userToAddId, userId);
             if(response.Status == StatusEnum.NotFound)
             {
                 return NotFound(response.Message);
@@ -73,6 +74,10 @@ namespace CrewBackend.Controllers
             if (response.Status == Data.Enums.StatusEnum.NotFound)
             {
                 return NotFound();
+            }
+            else if (response.Status == StatusEnum.AuthorizationError)
+            {
+                return Unauthorized();
             }
             return Ok();
         }

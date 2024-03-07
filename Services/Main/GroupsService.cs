@@ -52,23 +52,29 @@ namespace CrewBackend.Services
             return response;
 
         }
-        public ResponseModel<object> AddUserToGroup(long groupId, long userId)
+        public ResponseModel<object> AddUserToGroup(long groupId, long userToAddId, long userId)
         {
             ResponseModel<object> response = new ResponseModel<object>();
-            if(!db.Groups.Any(x => x.Id == groupId) || !db.Users.Any(x => x.Id == userId)){
+            if (!rolesValidator.IsAdmin(userId, groupId))
+            {
+                response.Status = StatusEnum.AuthorizationError;
+                return response;
+            }
+            
+            if(!db.Groups.Any(x => x.Id == groupId) || !db.Users.Any(x => x.Id == userToAddId)){
                 response.Status = StatusEnum.NotFound;
                 response.Message = "Resource not found";
                 return response;
             }
 
-            if(db.UsersGroups.Any(x => x.UserId == userId && x.GroupId == groupId)){
+            if(db.UsersGroups.Any(x => x.UserId == userToAddId && x.GroupId == groupId)){
                 response.Status = StatusEnum.ResourceExist;
                 response.Message = "Resource exist";
                 return response;
             }
             UsersGroup userGroup = new UsersGroup
             {
-                UserId = userId,
+                UserId = userToAddId,
                 GroupId = groupId,
                 RoleId = (int)Data.Enums.Roles.Member
             };
@@ -100,6 +106,12 @@ namespace CrewBackend.Services
         public ResponseModel<object> CreatePost(CreateGroupPostDto dto, long userId, long groupId)
         {
             ResponseModel<object> response = new ResponseModel<object>();
+            if (!checkIfUserIsGroupMember(userId, groupId))
+            {
+                response.Status = StatusEnum.AuthorizationError;
+                return response;
+            }
+            
             
             string? groupName = db.Groups.FirstOrDefault(g => g.Id == groupId)?.Name;
             if(groupName is null)
@@ -131,6 +143,10 @@ namespace CrewBackend.Services
             response.Status = StatusEnum.Ok;
 
             return response;
+        }
+        private bool checkIfUserIsGroupMember(long userId, long groupId)
+        {
+            return db.UsersGroups.Any(x => x.UserId == userId && x.GroupId == groupId);
         }
     }
 }

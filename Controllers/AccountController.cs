@@ -68,6 +68,7 @@ namespace CrewBackend.Controllers
         [HttpPost("Register")]
         public IActionResult Register([FromBody]RegisterUserDto dto)
         {
+            
             ResponseModel<object> response = accountService.Register(dto, CreateActivationLink());
             if (response.Status == StatusEnum.ResourceExist)
                 return BadRequest(response);
