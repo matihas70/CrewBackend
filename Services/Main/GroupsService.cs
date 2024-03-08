@@ -71,7 +71,7 @@ namespace CrewBackend.Services
                 response.Status = StatusEnum.ResourceExist;
                 response.Message = "Resource exist";
                 return response;
-            }
+            } 
             UsersGroup userGroup = new UsersGroup
             {
                 UserId = userToAddId,
@@ -123,8 +123,7 @@ namespace CrewBackend.Services
                 return response;
             }
             var notificationService = notificatorFactory.Create(groupId);
-            List<long> taggedMembersIds = JsonSerializer.Deserialize<List<long>>(dto.TaggedMembers)!;
-            foreach ( long id in taggedMembersIds)
+            foreach ( long id in dto.TaggedMembers)
             {
                 var observer = groupObserverFactory.Create(id, userId, db);
                 notificationService.Attach(observer);
@@ -134,7 +133,7 @@ namespace CrewBackend.Services
             {
                 Title = dto.Title,
                 Body = dto.Body,
-                TaggedUsers = dto.TaggedMembers,
+                TaggedUsers = JsonSerializer.Serialize(dto.TaggedMembers),
                 CreatedBy = userId,
                 CreateDate = DateTime.Now,
                 GroupId = groupId,

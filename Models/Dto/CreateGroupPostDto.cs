@@ -3,7 +3,7 @@
     public record CreateGroupPostDto(
             string Title,
             string Body,
-            string TaggedMembers
+            List<long> TaggedMembers
            
         );
 }
