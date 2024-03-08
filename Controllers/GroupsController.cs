@@ -50,10 +50,11 @@ namespace CrewBackend.Controllers
             }
             return Created();
         }
-        [HttpDelete("{groupId}/{userToRemove}")]
+        [HttpDelete("{groupId}/{userToRemoveId}")]
         public IActionResult RemoveUserFromGroup(long groupId, long userToRemoveId)
         {
-            ResponseModel<object> response = groupsService.RemoveUserFromGroup(groupId, userToRemoveId);
+            long userId = userContextInfo.GetUserId();
+            ResponseModel<object> response = groupsService.RemoveUserFromGroup(groupId, userToRemoveId, userId);
             if(response.Status == Data.Enums.StatusEnum.NotFound)
             {
                 return NotFound(response.Message);

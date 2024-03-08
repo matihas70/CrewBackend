@@ -80,12 +80,13 @@ namespace CrewBackend.Services
             };
 
             db.UsersGroups.Add(userGroup);
+            db.SaveChanges();
             response.Status = StatusEnum.Ok;
             response.Message = "User added";
             return response;
 
         }
-        public ResponseModel<object> RemoveUserFromGroup(long groupId, long userId)
+        public ResponseModel<object> RemoveUserFromGroup(long groupId, long userToRemoveId, long userId)
         {
             ResponseModel<object> response = new ResponseModel<object>();
             if (!rolesValidator.IsAdmin(userId, groupId)){
@@ -93,12 +94,13 @@ namespace CrewBackend.Services
                 return response;
             }
             
-            if(!db.UsersGroups.Any(x => x.GroupId == groupId && x.UserId == userId))
+            if(!db.UsersGroups.Any(x => x.GroupId == groupId && x.UserId == userToRemoveId))
             {
                 response.Status = StatusEnum.NotFound;
                 response.Message = "Resource not found";
+                return response;
             }
-            db.UsersGroups.Where(x => x.GroupId == groupId && x.UserId == userId).ExecuteDelete();
+            db.UsersGroups.Where(x => x.GroupId == groupId && x.UserId == userToRemoveId).ExecuteDelete();
             response.Status = StatusEnum.Ok;
             return response;
         }
