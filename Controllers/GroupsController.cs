@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using CrewBackend.Data.Enums;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 
 namespace CrewBackend.Controllers
 {
@@ -18,8 +19,21 @@ namespace CrewBackend.Controllers
         private readonly IGroupsService groupsService;
         public GroupsController(IUserContextInfo _userContextInfo, IGroupsService _groupsService) =>
            (userContextInfo, groupsService) = (_userContextInfo, _groupsService);
-        
-        
+
+
+        [HttpGet("{groupId}")]
+        public IActionResult GetGroupInfo([FromRoute] long groupId)
+        {
+            long userId = userContextInfo.GetUserId();
+            ResponseModel<OutputGroupInfo> response = groupsService.GetGroupInfo(groupId, userId);
+
+            if(response.Status == StatusEnum.NotFound)
+            {
+                return NotFound();
+            }
+            return Ok(response.ResponseData);
+        }
+
         [HttpPost]
         public IActionResult CreateGroup([FromBody]CreateGroupDto dto)
         {
@@ -31,6 +45,9 @@ namespace CrewBackend.Controllers
             }
             return Created();
         }
+
+
+
         [HttpPost("{groupId}/{userToAddId}")]
         public IActionResult AddUserToGroup(long groupId, long userToAddId)
         {

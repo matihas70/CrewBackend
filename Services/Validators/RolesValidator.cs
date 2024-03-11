@@ -14,5 +14,9 @@ namespace CrewBackend.Services
         {
             return db.UsersGroups.Any(x => x.UserId == userId && x.GroupId == groupId && x.RoleId == (int)Data.Enums.Roles.Admin);
         }
+        public bool IsMember(long userId, long groupId)
+        {
+            return db.UsersGroups.Any(x => x.UserId == userId && x.GroupId == groupId);
+        }
     }
 }

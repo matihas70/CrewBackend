@@ -19,6 +19,31 @@ namespace CrewBackend.Services
         public GroupsService(CrewDbContext _db, IGroupNotificatorFactory _notificatorFactory, IGroupObserverFactory _groupObserverFactory, IRolesValidator _rolesValidator) =>
             (db,  notificatorFactory, groupObserverFactory, rolesValidator) = (_db, _notificatorFactory, _groupObserverFactory, _rolesValidator);
 
+
+        public ResponseModel<OutputGroupInfo> GetGroupInfo(long groupId, long userId)
+        {
+            ResponseModel<OutputGroupInfo> response = new ResponseModel<OutputGroupInfo>();
+            if(!rolesValidator.IsMember(userId, groupId))
+            {
+                response.Status = StatusEnum.NotFound;
+                return response;
+            }
+            OutputGroupInfo? groupInfo = db.Groups.Where(g => g.Id == groupId)
+                                                 .GroupJoin(db.UsersGroups, g => g.Id, ug => ug.GroupId, (g, ug) => new { g, count = ug.Count() })
+                                                 .Select(x => new OutputGroupInfo(
+                                                        x.g.Name,
+                                                        x.count
+                                                     )).FirstOrDefault();
+            if(groupInfo is null)
+            {
+                response.Status = StatusEnum.NotFound;
+                return response;
+            }
+            response.Status = StatusEnum.Ok;
+            response.ResponseData = groupInfo;
+            return response;
+        }
+
         public ResponseModel<object> CreateGroup(CreateGroupDto dto, long userId)
         {
             ResponseModel<object> response = new ResponseModel<object>();
@@ -108,12 +133,11 @@ namespace CrewBackend.Services
         public ResponseModel<object> CreatePost(CreateGroupPostDto dto, long userId, long groupId)
         {
             ResponseModel<object> response = new ResponseModel<object>();
-            if (!checkIfUserIsGroupMember(userId, groupId))
+            if (!rolesValidator.IsAdmin(userId, groupId))
             {
                 response.Status = StatusEnum.AuthorizationError;
                 return response;
             }
-            
             
             string? groupName = db.Groups.FirstOrDefault(g => g.Id == groupId)?.Name;
             if(groupName is null)
@@ -144,10 +168,6 @@ namespace CrewBackend.Services
             response.Status = StatusEnum.Ok;
 
             return response;
-        }
-        private bool checkIfUserIsGroupMember(long userId, long groupId)
-        {
-            return db.UsersGroups.Any(x => x.UserId == userId && x.GroupId == groupId);
         }
     }
 }
