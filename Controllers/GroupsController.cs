@@ -33,6 +33,21 @@ namespace CrewBackend.Controllers
             }
             return Ok(response.ResponseData);
         }
+        [HttpGet]
+        public IActionResult GetGroupPosts([FromBody] GetGroupPostsDto dto)
+        {
+            long userId = userContextInfo.GetUserId();
+            ResponseModel<IEnumerable<OutputGroupPostDto>> response = groupsService.GetGroupPosts(dto, userId);
+            if(response.Status == StatusEnum.AuthorizationError)
+            {
+                return Unauthorized();
+            }
+            else if(response.Status == StatusEnum.NoMoreContent)
+            {
+                return NoContent();
+            }
+            return Ok(response.ResponseData);
+        }
 
         [HttpPost]
         public IActionResult CreateGroup([FromBody]CreateGroupDto dto)

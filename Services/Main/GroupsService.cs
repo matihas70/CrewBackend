@@ -43,6 +43,41 @@ namespace CrewBackend.Services
             response.ResponseData = groupInfo;
             return response;
         }
+        public ResponseModel<IEnumerable<OutputGroupPostDto>> GetGroupPosts(GetGroupPostsDto dto, long userId)
+        {
+            ResponseModel<IEnumerable<OutputGroupPostDto>> response = new ResponseModel<IEnumerable<OutputGroupPostDto>>();
+            if(!rolesValidator.IsMember(userId, dto.groupId))
+            {
+                response.Status = StatusEnum.AuthorizationError;
+                return response;
+            }
+
+            response.ResponseData = db.GroupsPosts.Include(x => x.CreatedByNavigation)
+                                                  .Join(db.UsersGroups.Include(x => x.Role), gp => gp.CreatedBy, ug => ug.UserId, (gp, ug) => new { gp, ug })
+                                                  .Where(x => x.gp.GroupId == dto.groupId)
+                                                  .OrderByDescending(x => x.gp.CreateDate)
+                                                  .Select(x => new OutputGroupPostDto(
+                                                        new GroupPostAuthor(
+                                                                x.gp.CreatedByNavigation.Id,
+                                                                x.gp.CreatedByNavigation.Name + " " + x.gp.CreatedByNavigation.Surname,
+                                                                x.ug.Role.Name
+                                                            ),
+                                                        x.gp.Id,
+                                                        x.gp.Title,
+                                                        x.gp.Body,
+                                                        x.gp.CreateDate
+                                                      )).Skip(dto.skip)
+                                                      .ToList();
+            if(response.ResponseData is null || response.ResponseData.Count() == 0) 
+            {
+                response.Status = StatusEnum.NoMoreContent;
+            }
+            else
+            {
+                response.Status = StatusEnum.Ok;
+            }
+            return response;
+        }
 
         public ResponseModel<object> CreateGroup(CreateGroupDto dto, long userId)
         {

@@ -9,6 +9,7 @@
         AuthenticationError = 4,
         Expired = 5,
         AuthorizationError = 6,
+        NoMoreContent = 7,
         UnknownError = 1000,
     }
 }
