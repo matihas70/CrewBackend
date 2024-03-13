@@ -23,6 +23,8 @@ public partial class CrewDbContext : DbContext
 
     public virtual DbSet<GroupsPost> GroupsPosts { get; set; }
 
+    public virtual DbSet<Notification> Notifications { get; set; }
+
     public virtual DbSet<Role> Roles { get; set; }
 
     public virtual DbSet<Session> Sessions { get; set; }
@@ -32,6 +34,8 @@ public partial class CrewDbContext : DbContext
     public virtual DbSet<UserEducation> UserEducations { get; set; }
 
     public virtual DbSet<UsersGroup> UsersGroups { get; set; }
+
+    public virtual DbSet<UsersNotification> UsersNotifications { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer("Name=ConnectionStrings:CrewDB");
@@ -113,6 +117,12 @@ public partial class CrewDbContext : DbContext
             entity.HasOne(d => d.Group).WithMany(p => p.GroupsPosts)
                 .HasForeignKey(d => d.GroupId)
                 .HasConstraintName("FK_Groups_posts_group");
+        });
+
+        modelBuilder.Entity<Notification>(entity =>
+        {
+            entity.Property(e => e.Body).HasMaxLength(255);
+            entity.Property(e => e.Subject).HasMaxLength(100);
         });
 
         modelBuilder.Entity<Role>(entity =>
@@ -201,6 +211,25 @@ public partial class CrewDbContext : DbContext
             entity.HasOne(d => d.User).WithMany(p => p.UsersGroups)
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("FK_Users_groups_user");
+        });
+
+        modelBuilder.Entity<UsersNotification>(entity =>
+        {
+            entity.ToTable("Users_notifications");
+
+            entity.Property(e => e.Details)
+                .HasMaxLength(2000)
+                .IsUnicode(false);
+            entity.Property(e => e.NotifyId).HasColumnName("Notify_id");
+            entity.Property(e => e.UserId).HasColumnName("User_id");
+
+            entity.HasOne(d => d.Notify).WithMany(p => p.UsersNotifications)
+                .HasForeignKey(d => d.NotifyId)
+                .HasConstraintName("FK_Users_notifications_notifications");
+
+            entity.HasOne(d => d.User).WithMany(p => p.UsersNotifications)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("FK_Users_notifications_users");
         });
 
         OnModelCreatingPartial(modelBuilder);

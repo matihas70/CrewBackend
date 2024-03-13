@@ -32,4 +32,6 @@ public partial class User
     public virtual ICollection<UserEducation> UserEducations { get; set; } = new List<UserEducation>();
 
     public virtual ICollection<UsersGroup> UsersGroups { get; set; } = new List<UsersGroup>();
+
+    public virtual ICollection<UsersNotification> UsersNotifications { get; set; } = new List<UsersNotification>();
 }
