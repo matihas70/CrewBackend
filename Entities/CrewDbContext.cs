@@ -122,6 +122,7 @@ public partial class CrewDbContext : DbContext
         modelBuilder.Entity<Notification>(entity =>
         {
             entity.Property(e => e.Body).HasMaxLength(255);
+            entity.Property(e => e.Name).HasMaxLength(100);
             entity.Property(e => e.Subject).HasMaxLength(100);
         });
 

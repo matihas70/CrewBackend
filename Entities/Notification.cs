@@ -11,5 +11,7 @@ public partial class Notification
 
     public string Body { get; set; } = null!;
 
+    public string Name { get; set; } = null!;
+
     public virtual ICollection<UsersNotification> UsersNotifications { get; set; } = new List<UsersNotification>();
 }

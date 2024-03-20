@@ -4,6 +4,6 @@ namespace CrewBackend.Interfaces
 {
     public interface IGroupObserverFactory
     {
-        IGroupObserver Create(long userId, long taggedBy, CrewDbContext db);
+        IGroupObserver Create(User user, User taggedBy, CrewDbContext db);
     }
 }

@@ -12,7 +12,7 @@ namespace CrewBackend.Factories
             => (db) = (_db);
         public IGroupNotificator Create(long groupId)
         {
-            return new GroupMembersNotificator(db, groupId);
+            return new GroupNotificator(db, groupId);
         }
     }
 }

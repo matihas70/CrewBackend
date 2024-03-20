@@ -1,6 +1,8 @@
 ﻿using CrewBackend.Entities;
 using CrewBackend.Interfaces;
 using CrewBackend.Models;
+using CrewBackend.Models.Obesrvers;
+using CrewBackend.Models.Obesrvers.Decorators;
 
 namespace CrewBackend.Factories
 {
@@ -12,9 +14,20 @@ namespace CrewBackend.Factories
             emailNotificator = _emailNotificator;
         }
 
-        public IGroupObserver Create(long userId, long taggedBy, CrewDbContext db)
+        public IGroupObserver Create(User user, User taggedBy, CrewDbContext db)
         {
-            return new UserGroupPostTagEmailObserver(userId, taggedBy, emailNotificator, db);
+            var groupObserver = new UserGroupPostTagObserver(user, db, taggedBy);
+
+            if (checkIfUserWantEmailNotification(user))
+                return new UserGroupPostTagObserverEmailDecorator(groupObserver, emailNotificator);
+
+            return groupObserver;
+        }
+
+        private bool checkIfUserWantEmailNotification(User user)
+        {
+
+            return true;
         }
     }
 }

@@ -8,6 +8,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using CrewBackend.Data.Enums;
 using Microsoft.AspNetCore.DataProtection.Repositories;
+using System.Linq;
 namespace CrewBackend.Services
 {
     public class GroupsService:IGroupsService
@@ -182,9 +183,12 @@ namespace CrewBackend.Services
                 return response;
             }
             var notificationService = notificatorFactory.Create(groupId);
-            foreach ( long id in dto.TaggedMembers)
+            User taggedBy = db.Users.FirstOrDefault(x => x.Id == userId)!;
+
+            IEnumerable<User> tagged = db.Users.Where(x => dto.TaggedMembers.Any(y => y == x.Id)).AsEnumerable();
+            foreach ( User user in tagged)
             {
-                var observer = groupObserverFactory.Create(id, userId, db);
+                var observer = groupObserverFactory.Create(user, taggedBy, db);
                 notificationService.Attach(observer);
             }
             notificationService.SendNotifications();

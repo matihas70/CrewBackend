@@ -4,6 +4,6 @@ namespace CrewBackend.Interfaces
 {
     public interface IGroupObserver
     {
-        void Notify(string groupName);
+        void Notify(Group group);
     }
 }

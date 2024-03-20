@@ -1,15 +1,15 @@
-﻿using CrewBackend.Entities;
+﻿using CrewBackend.Data.Enums;
+using CrewBackend.Entities;
 using CrewBackend.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace CrewBackend.Services
 {
-    public class GroupMembersNotificator:IGroupNotificator
+    public class GroupNotificator:IGroupNotificator
     {
         private readonly CrewDbContext db;
-        private readonly IEmailNotificationService notificationService;
         private readonly long groupId;
-        public GroupMembersNotificator(CrewDbContext _db, long _groupId) =>
+        public GroupNotificator(CrewDbContext _db, long _groupId) =>
             (db, groupId) = (_db, _groupId);
 
         private List<IGroupObserver> observers = [];
@@ -23,15 +23,15 @@ namespace CrewBackend.Services
         }
         public void SendNotifications()
         {
-            string? groupName = db.Groups.FirstOrDefault(g => g.Id == groupId)?.Name;
+            Group? group = db.Groups.AsNoTracking().FirstOrDefault(g => g.Id == groupId);
 
-            if(groupName is null)
+            if(group is null)
             {
                 throw new Exception("Group not found");
             }
             foreach (IGroupObserver observer in observers)
             {
-                observer.Notify(groupName);
+                observer.Notify(group);
             }
         }
     }
