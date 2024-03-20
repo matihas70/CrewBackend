@@ -9,7 +9,7 @@ namespace CrewBackend.Models.Obesrvers.Decorators
         public UserGroupObserverDecorator(UserGroupPostTagObserver _groupObserver)
             => groupObserver = _groupObserver;
 
-        public void Notify(Group group)
+        public virtual void Notify(Group group)
         {
             groupObserver.Notify(group);
         }

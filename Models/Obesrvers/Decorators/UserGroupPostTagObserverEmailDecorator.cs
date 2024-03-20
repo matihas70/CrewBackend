@@ -11,7 +11,7 @@ namespace CrewBackend.Models.Obesrvers.Decorators
                                                       IEmailNotificationService _emailNotificator) : base(groupObserver) 
             => emailNotificator = _emailNotificator;
 
-        public void Notify(Group group)
+        public override void Notify(Group group)
         {
             base.Notify(group);
 
