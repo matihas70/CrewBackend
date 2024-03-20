@@ -2,7 +2,7 @@
 {
     public record GetGroupPostsDto(
         long groupId,    
-        int skip
+        long lastSeendId
         );
     
 }

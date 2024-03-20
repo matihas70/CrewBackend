@@ -67,7 +67,7 @@ namespace CrewBackend.Services
                                                         x.gp.Title,
                                                         x.gp.Body,
                                                         x.gp.CreateDate
-                                                      )).Skip(dto.skip)
+                                                      )).SkipWhile(x => x.Id < dto.lastSeendId)
                                                       .ToList();
             if(response.ResponseData is null || response.ResponseData.Count() == 0) 
             {
