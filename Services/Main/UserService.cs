@@ -5,7 +5,6 @@ using CrewBackend.Interfaces;
 using CrewBackend.Models;
 using CrewBackend.Models.Dto;
 using Microsoft.EntityFrameworkCore;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CrewBackend.Services
 {
@@ -80,7 +79,7 @@ namespace CrewBackend.Services
                                                  DateTo = x.DateTo,
                                                  Field = x.Field,
                                                  Degree = x.Degree,
-                                                 AdditionalInfo = x.AdditionalInfo
+                                                 UserId = userId
                                              }).ToList();
 
 
@@ -94,13 +93,29 @@ namespace CrewBackend.Services
                                       .SetProperty(p => p.DateTo, item.DateTo)
                                       .SetProperty(p => p.Field, item.Field)
                                       .SetProperty(p => p.Degree, item.Degree)
-                                      .SetProperty(p => p.AdditionalInfo, item.AdditionalInfo)
                                  );
             }
             db.UserEducations.AddRange(newData);
             db.SaveChanges();
             response.Status = StatusEnum.Ok;
             response.ResponseData = newData.Select(x => x.Id);
+            return response;
+        }
+        public ResponseModel<object> DeleteEducationData(long id, long userId)
+        {
+            ResponseModel<object> response = new ResponseModel<object>();
+
+            bool exist = db.UserEducations.Any(x => x.Id == id && x.UserId == userId);
+            
+            if (!exist)
+            {
+                response.Status = StatusEnum.NotFound;
+                return response;
+            }
+
+            db.UserEducations.Remove(new UserEducation { Id = id });
+            db.SaveChanges();
+            response.Status = StatusEnum.Ok;
             return response;
         }
         public ResponseModel<byte[]> GetProfilePicture(long userId)

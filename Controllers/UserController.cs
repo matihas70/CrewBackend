@@ -90,5 +90,18 @@ namespace CrewBackend.Controllers
 
             return Ok(response.ResponseData);
         }
+        [HttpDelete("Education/{id}")]
+        public IActionResult DeleteUserEducation([FromRoute] long id)
+        {
+            long userId = userContextInfo.GetUserId();
+            ResponseModel<object> response = userService.DeleteEducationData(id, userId);
+
+            if(response.Status == StatusEnum.NotFound)
+            {
+                return NotFound();
+            }
+
+            return NoContent();
+        }
     }
 }

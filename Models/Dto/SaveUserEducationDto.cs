@@ -7,7 +7,6 @@
             DateOnly DateFrom,
             DateOnly? DateTo,
             string Field,
-            string Degree,
-            string? AdditionalInfo
+            string Degree
         );
 }
